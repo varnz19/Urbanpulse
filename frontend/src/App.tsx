@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Sidebar } from './components/layout/Sidebar';
 import { TopNav } from './components/layout/TopNav';
+import { FloatingBottomNav } from './components/layout/FloatingBottomNav';
 import { OverviewPage } from './pages/Overview/OverviewPage';
 import { DatasetsPage } from './pages/Datasets/DatasetsPage';
 import { PatternExplorerPage } from './pages/PatternExplorer/PatternExplorerPage';
@@ -42,44 +42,44 @@ export function App() {
 
   return (
     <BrowserRouter>
-      <div className="app-container">
-        <Sidebar />
-        <div className="main-wrapper">
-          <TopNav
-            datasets={datasets}
-            selectedDatasetId={selectedDatasetId}
-            onSelectDataset={(id) => setSelectedDatasetId(id)}
-            onRefresh={loadDatasets}
-            isLoading={loading}
-          />
+      <div className="app-container full-width-layout">
+        <TopNav
+          datasets={datasets}
+          selectedDatasetId={selectedDatasetId}
+          onSelectDataset={(id) => setSelectedDatasetId(id)}
+          onRefresh={loadDatasets}
+          isLoading={loading}
+        />
 
-          <main className="content-body">
-            <Routes>
-              <Route path="/" element={<OverviewPage datasetId={selectedDatasetId} />} />
-              <Route path="/overview" element={<Navigate to="/" replace />} />
-              <Route
-                path="/datasets"
-                element={
-                  <DatasetsPage
-                    datasetId={selectedDatasetId}
-                    onDatasetUploaded={loadDatasets}
-                  />
-                }
-              />
-              <Route path="/patterns" element={<PatternExplorerPage datasetId={selectedDatasetId} />} />
-              <Route path="/segments" element={<SegmentIntelligencePage datasetId={selectedDatasetId} />} />
-              <Route path="/classification" element={<ClassificationPage datasetId={selectedDatasetId} />} />
-              <Route path="/association" element={<AssociationRulesPage datasetId={selectedDatasetId} />} />
-              <Route path="/anomalies" element={<AnomaliesPage datasetId={selectedDatasetId} />} />
-              <Route path="/experiments" element={<ExperimentsPage datasetId={selectedDatasetId} />} />
-              <Route path="/reports" element={<ReportsPage datasetId={selectedDatasetId} />} />
-              <Route path="/provenance" element={<ProvenancePage />} />
-              <Route path="/terms" element={<TermsPage />} />
-              <Route path="/privacy" element={<PrivacyPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </main>
-        </div>
+        <main className="content-body">
+          <Routes>
+            <Route path="/" element={<OverviewPage datasetId={selectedDatasetId} />} />
+            <Route path="/overview" element={<Navigate to="/" replace />} />
+            <Route
+              path="/datasets"
+              element={
+                <DatasetsPage
+                  datasetId={selectedDatasetId}
+                  onDatasetUploaded={loadDatasets}
+                />
+              }
+            />
+            <Route path="/patterns" element={<PatternExplorerPage datasetId={selectedDatasetId} />} />
+            <Route path="/segments" element={<SegmentIntelligencePage datasetId={selectedDatasetId} />} />
+            <Route path="/classification" element={<ClassificationPage datasetId={selectedDatasetId} />} />
+            <Route path="/association" element={<AssociationRulesPage datasetId={selectedDatasetId} />} />
+            <Route path="/anomalies" element={<AnomaliesPage datasetId={selectedDatasetId} />} />
+            <Route path="/experiments" element={<ExperimentsPage datasetId={selectedDatasetId} />} />
+            <Route path="/reports" element={<ReportsPage datasetId={selectedDatasetId} />} />
+            <Route path="/provenance" element={<ProvenancePage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+
+        {/* Floating bottom navigation bar in the air with icons */}
+        <FloatingBottomNav />
       </div>
     </BrowserRouter>
   );
