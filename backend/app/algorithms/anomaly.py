@@ -18,11 +18,14 @@ def run_anomaly_detection(df: pd.DataFrame, req: AnomalyRequest) -> AnomalyRespo
 
     metric_col = req.metric_column
     if metric_col not in clean_df.columns:
-        # Fallback to speed if available
         if "avg_speed_kmh" in clean_df.columns:
             metric_col = "avg_speed_kmh"
         else:
-            raise ValueError(f"Metric column '{req.metric_column}' not found.")
+            num_cols = clean_df.select_dtypes(include=[np.number]).columns.tolist()
+            if num_cols:
+                metric_col = num_cols[0]
+            else:
+                raise ValueError(f"No numeric columns found in dataset for anomaly detection.")
 
     clean_df = clean_df.dropna(subset=[metric_col]).reset_index(drop=True)
     if len(clean_df) < 10:

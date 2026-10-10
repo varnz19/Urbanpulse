@@ -57,6 +57,24 @@ def run_association_mining(df: pd.DataFrame, req: AssociationRequest) -> Associa
                 return "Speed=Unknown"
         cat_df["speed"] = df["avg_speed_kmh"].apply(speed_bracket)
 
+    # Generic fallback: ingest any categorical or discretizable numeric columns for any dataset
+    if len(cat_df.columns) < 2:
+        for col in df.columns:
+            if col in cat_df.columns:
+                continue
+            if pd.api.types.is_object_dtype(df[col]) or isinstance(df[col].dtype, pd.CategoricalDtype):
+                if 1 < df[col].nunique() <= 20:
+                    cat_df[col] = f"{col}=" + df[col].astype(str)
+            elif pd.api.types.is_numeric_dtype(df[col]):
+                try:
+                    if df[col].nunique() > 2:
+                        binned = pd.qcut(df[col].dropna(), q=3, labels=["Low", "Med", "High"], duplicates="drop")
+                        cat_df[col] = f"{col}=" + binned.astype(str)
+                except Exception:
+                    pass
+            if len(cat_df.columns) >= 6:
+                break
+
     if cat_df.empty or len(cat_df.columns) < 2:
         return AssociationResponse(
             total_rules_found=0,
