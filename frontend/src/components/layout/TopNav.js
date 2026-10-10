@@ -1,0 +1,6 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { Database, RefreshCw } from 'lucide-react';
+export const TopNav = ({ datasets, selectedDatasetId, onSelectDataset, onRefresh, isLoading, }) => {
+    const currentDataset = datasets.find(d => d.id === selectedDatasetId);
+    return (_jsxs("header", { className: "top-nav", children: [_jsxs("div", { className: "dataset-picker", children: [_jsx(Database, { size: 16, style: { color: 'var(--accent-teal)' } }), _jsx("span", { className: "dataset-picker-label", children: "Active Dataset:" }), _jsx("select", { className: "dataset-select", value: selectedDatasetId, onChange: (e) => onSelectDataset(e.target.value), children: datasets.map((d) => (_jsxs("option", { value: d.id, children: [d.name, " (", d.file_format.toUpperCase(), ")"] }, d.id))) }), currentDataset && (_jsxs("span", { className: "badge badge-neutral", children: [currentDataset.row_count.toLocaleString(), " rows \u2022 ", currentDataset.column_count, " cols"] }))] }), _jsx("div", { className: "top-actions", children: _jsxs("button", { className: "btn btn-secondary", onClick: onRefresh, disabled: isLoading, title: "Refresh analytics data", children: [_jsx(RefreshCw, { size: 14, className: isLoading ? 'spinner' : '' }), _jsx("span", { children: "Refresh Data" })] }) })] }));
+};
