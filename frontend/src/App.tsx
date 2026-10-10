@@ -12,6 +12,8 @@ import { AnomaliesPage } from './pages/Anomalies/AnomaliesPage';
 import { ExperimentsPage } from './pages/Experiments/ExperimentsPage';
 import { ReportsPage } from './pages/Reports/ReportsPage';
 import { ProvenancePage } from './pages/Provenance/ProvenancePage';
+import { TermsPage } from './pages/Terms/TermsPage';
+import { PrivacyPage } from './pages/Privacy/PrivacyPage';
 import { fetchDatasets } from './services/api';
 import { Dataset } from './types';
 import './App.css';
@@ -72,6 +74,8 @@ export function App() {
               <Route path="/experiments" element={<ExperimentsPage datasetId={selectedDatasetId} />} />
               <Route path="/reports" element={<ReportsPage datasetId={selectedDatasetId} />} />
               <Route path="/provenance" element={<ProvenancePage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>

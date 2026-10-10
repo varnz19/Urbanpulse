@@ -3,7 +3,6 @@ import { PageHeader } from '../../components/layout/PageHeader';
 import { LoadingSkeleton, ErrorAlert } from '../../components/common/Feedback';
 import { runAssociation, saveExperiment } from '../../services/api';
 import { AssociationResponse } from '../../types';
-import { GitPullRequest, Download, Bookmark, Sparkles, AlertTriangle } from 'lucide-react';
 
 interface AssociationRulesPageProps {
   datasetId: string;
@@ -78,31 +77,22 @@ export const AssociationRulesPage: React.FC<AssociationRulesPageProps> = ({ data
 
       {/* Caution Alert regarding correlation vs causation */}
       <div style={{
-        backgroundColor: 'rgba(245, 158, 11, 0.08)',
-        border: '1px solid rgba(245, 158, 11, 0.25)',
+        backgroundColor: 'rgba(217, 119, 6, 0.12)',
+        border: '1px solid #D97706',
         borderRadius: 'var(--radius-sm)',
-        padding: '12px 16px',
-        color: '#FCD34D',
-        fontSize: '0.82rem',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        marginBottom: '20px'
+        padding: '10px 14px',
+        color: '#FBBF24',
+        fontSize: '0.8rem',
+        marginBottom: '16px'
       }}>
-        <AlertTriangle size={18} style={{ color: '#F59E0B', flexShrink: 0 }} />
-        <span>
-          <strong>Methodological Note:</strong> Association rules identify statistical co-occurrence within historical sensor transactions. Association does not establish causation or ground-truth physical etiology.
-        </span>
+        <strong>Methodological Note:</strong> Association rules identify statistical co-occurrence within observation transactions. Association does not establish causation or physical etiology.
       </div>
 
       {/* Configuration Controls */}
-      <div className="card" style={{ marginBottom: '24px' }}>
+      <div className="card" style={{ marginBottom: '20px' }}>
         <div className="card-header">
           <div>
-            <div className="card-title">
-              <GitPullRequest size={18} style={{ color: 'var(--accent-teal)' }} />
-              Apriori Mining Thresholds
-            </div>
+            <div className="card-title">Apriori Mining Thresholds</div>
             <div className="card-subtitle">Adjust minimum support, confidence, and lift thresholds</div>
           </div>
           <button
@@ -110,12 +100,11 @@ export const AssociationRulesPage: React.FC<AssociationRulesPageProps> = ({ data
             onClick={handleRunApriori}
             disabled={loading}
           >
-            <Sparkles size={14} />
-            <span>{loading ? 'Mining Frequent Itemsets...' : 'Discover Rules'}</span>
+            <span>{loading ? 'Mining Itemsets...' : 'Discover Rules'}</span>
           </button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
           <div>
             <label className="form-label">Minimum Support: {(minSupport * 100).toFixed(0)}%</label>
             <input
@@ -125,9 +114,9 @@ export const AssociationRulesPage: React.FC<AssociationRulesPageProps> = ({ data
               step="0.01"
               value={minSupport}
               onChange={(e) => setMinSupport(Number(e.target.value))}
-              style={{ width: '100%', accentColor: 'var(--accent-teal)', marginTop: '8px' }}
+              style={{ width: '100%', accentColor: 'var(--accent-teal)', marginTop: '6px' }}
             />
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '4px' }}>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '2px' }}>
               Minimum frequency of itemset across observations
             </div>
           </div>
@@ -141,10 +130,10 @@ export const AssociationRulesPage: React.FC<AssociationRulesPageProps> = ({ data
               step="0.05"
               value={minConfidence}
               onChange={(e) => setMinConfidence(Number(e.target.value))}
-              style={{ width: '100%', accentColor: 'var(--accent-teal)', marginTop: '8px' }}
+              style={{ width: '100%', accentColor: 'var(--accent-teal)', marginTop: '6px' }}
             />
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '4px' }}>
-              P(Consequent | Antecedent) conditional probability
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '2px' }}>
+              Conditional probability P(Consequent | Antecedent)
             </div>
           </div>
 
@@ -157,10 +146,10 @@ export const AssociationRulesPage: React.FC<AssociationRulesPageProps> = ({ data
               step="0.1"
               value={minLift}
               onChange={(e) => setMinLift(Number(e.target.value))}
-              style={{ width: '100%', accentColor: 'var(--accent-teal)', marginTop: '8px' }}
+              style={{ width: '100%', accentColor: 'var(--accent-teal)', marginTop: '6px' }}
             />
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '4px' }}>
-              Multiplier above baseline random independence (&gt; 1.0)
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '2px' }}>
+              Multiplier above baseline random independence
             </div>
           </div>
         </div>
@@ -176,7 +165,7 @@ export const AssociationRulesPage: React.FC<AssociationRulesPageProps> = ({ data
             <div>
               <div className="card-title">Discovered Rules ({result.total_rules_found})</div>
               <div className="card-subtitle">
-                Sorted by statistical lift (highest unexpected correlation first)
+                Sorted by statistical lift
               </div>
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
@@ -185,23 +174,21 @@ export const AssociationRulesPage: React.FC<AssociationRulesPageProps> = ({ data
                 onClick={handleSaveExperiment}
                 disabled={savedSuccess}
               >
-                <Bookmark size={14} />
-                <span>{savedSuccess ? '✓ Saved' : 'Save Run'}</span>
+                <span>{savedSuccess ? '[OK] Saved' : 'Save Run'}</span>
               </button>
               <button
                 className="btn btn-secondary"
                 onClick={exportRulesCsv}
                 disabled={result.rules.length === 0}
               >
-                <Download size={14} />
                 <span>Export CSV</span>
               </button>
             </div>
           </div>
 
           {result.rules.length === 0 ? (
-            <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)' }}>
-              No association rules met the specified support ({minSupport}) and confidence ({minConfidence}) thresholds. Try lowering the thresholds.
+            <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+              No association rules met the specified support ({minSupport}) and confidence ({minConfidence}) thresholds. Adjust thresholds to broaden search.
             </div>
           ) : (
             <div className="table-container">
@@ -213,21 +200,21 @@ export const AssociationRulesPage: React.FC<AssociationRulesPageProps> = ({ data
                     <th>Support</th>
                     <th>Confidence</th>
                     <th>Lift</th>
-                    <th>Plain English Interpretation</th>
+                    <th>Interpretation</th>
                   </tr>
                 </thead>
                 <tbody>
                   {result.rules.map((rule, idx) => (
                     <tr key={idx}>
                       <td>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
                           {rule.antecedents.map((ant, i) => (
                             <span key={i} className="badge badge-neutral">{ant}</span>
                           ))}
                         </div>
                       </td>
                       <td>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
                           {rule.consequents.map((con, i) => (
                             <span key={i} className="badge badge-mod">{con}</span>
                           ))}
@@ -235,12 +222,12 @@ export const AssociationRulesPage: React.FC<AssociationRulesPageProps> = ({ data
                       </td>
                       <td>{(rule.support * 100).toFixed(1)}%</td>
                       <td>
-                        <strong style={{ color: rule.confidence > 0.6 ? '#10B981' : '#F59E0B' }}>
+                        <strong style={{ color: rule.confidence > 0.6 ? '#059669' : '#D97706' }}>
                           {(rule.confidence * 100).toFixed(1)}%
                         </strong>
                       </td>
                       <td>
-                        <strong style={{ color: rule.lift > 1.8 ? '#EF4444' : '#14B8A6' }}>
+                        <strong style={{ color: rule.lift > 1.8 ? '#DC2626' : '#0D9488' }}>
                           {rule.lift.toFixed(2)}x
                         </strong>
                       </td>

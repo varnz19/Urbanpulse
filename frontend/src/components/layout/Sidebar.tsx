@@ -1,10 +1,5 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import {
-  LayoutDashboard, Database, Activity, Network,
-  BrainCircuit, GitPullRequest, AlertTriangle, FlaskConical,
-  FileText, Compass
-} from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
   return (
@@ -20,54 +15,61 @@ export const Sidebar: React.FC = () => {
       <nav className="sidebar-nav">
         <div className="nav-section-title">Core Analytics</div>
         <NavLink to="/" end className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-          <LayoutDashboard size={18} />
           <span>Command Center</span>
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>01</span>
         </NavLink>
         <NavLink to="/patterns" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-          <Activity size={18} />
           <span>Pattern Explorer</span>
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>02</span>
         </NavLink>
         <NavLink to="/segments" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-          <Network size={18} />
           <span>Segment Intelligence</span>
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>03</span>
         </NavLink>
 
         <div className="nav-section-title">Data Mining & ML</div>
         <NavLink to="/classification" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-          <BrainCircuit size={18} />
-          <span>Classification & Rules</span>
+          <span>Classification Models</span>
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>04</span>
         </NavLink>
         <NavLink to="/association" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-          <GitPullRequest size={18} />
           <span>Association Mining</span>
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>05</span>
         </NavLink>
         <NavLink to="/anomalies" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-          <AlertTriangle size={18} />
           <span>Anomaly Monitor</span>
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>06</span>
         </NavLink>
 
         <div className="nav-section-title">Workspace & Reports</div>
         <NavLink to="/datasets" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-          <Database size={18} />
           <span>Datasets & Prep</span>
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>07</span>
         </NavLink>
         <NavLink to="/experiments" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-          <FlaskConical size={18} />
           <span>Experiment Center</span>
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>08</span>
         </NavLink>
         <NavLink to="/reports" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-          <FileText size={18} />
           <span>Insight Reports</span>
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>09</span>
         </NavLink>
         <NavLink to="/provenance" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-          <Compass size={18} />
-          <span>Dataset Provenance</span>
+          <span>Provenance & Method</span>
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>10</span>
         </NavLink>
       </nav>
 
       <div className="sidebar-footer">
-        <span>v1.0 • Hyderabad Pilot</span>
-        <span style={{ color: 'var(--accent-teal)' }}>● Online</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+          <span>Status: Operational</span>
+          <span style={{ color: 'var(--accent-teal)' }}>v1.0</span>
+        </div>
+        <div className="sidebar-footer-links">
+          <NavLink to="/terms" className="sidebar-footer-link">Terms of Service</NavLink>
+          <span>•</span>
+          <NavLink to="/privacy" className="sidebar-footer-link">Privacy Policy</NavLink>
+        </div>
       </div>
     </aside>
   );

@@ -1,6 +1,6 @@
 import React from 'react';
 import { PageHeader } from '../../components/layout/PageHeader';
-import { Compass, ShieldCheck, MapPin, Database, Lock } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
 
 export const ProvenancePage: React.FC = () => {
   return (
@@ -10,19 +10,15 @@ export const ProvenancePage: React.FC = () => {
         description="Comprehensive documentation of geographic origin, data collection protocols, schema definitions, and data privacy principles."
       />
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1000px', margin: '0 auto' }}>
-        {/* Geographic Origin */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1000px', margin: '0 auto' }}>
         <div className="card">
           <div className="card-header">
-            <div className="card-title">
-              <MapPin size={18} style={{ color: 'var(--accent-teal)' }} />
-              Geographic Scope — Hyderabad, India
-            </div>
+            <div className="card-title">Geographic Scope: Hyderabad, India</div>
           </div>
-          <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '14px' }}>
-            The primary benchmark corpus represents 12 critical arterial corridors across the Greater Hyderabad Metropolitan Area in Telangana, India. The selection covers major high-density IT/tech hubs, transit interchanges, commercial corridors, and outer express corridors:
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: '12px' }}>
+            The primary benchmark corpus represents 12 critical arterial corridors across the Greater Hyderabad Metropolitan Area in Telangana, India. The selection covers high-density IT sectors, transit interchanges, commercial corridors, and outer express corridors:
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '10px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '8px' }}>
             {[
               { id: 'HYD-COR-01', name: 'HITEC City - Cyber Towers Junction', lat: 17.4504, lon: 78.3808, type: 'Tech Corridor' },
               { id: 'HYD-COR-02', name: 'Gachibowli - ORR Junction', lat: 17.4401, lon: 78.3489, type: 'Express Corridor' },
@@ -37,9 +33,9 @@ export const ProvenancePage: React.FC = () => {
               { id: 'HYD-COR-11', name: 'Financial District - Wipro Circle', lat: 17.4182, lon: 78.3418, type: 'Tech Corridor' },
               { id: 'HYD-COR-12', name: 'Madhapur - 100ft Road', lat: 17.4485, lon: 78.3908, type: 'Commercial Avenue' },
             ].map((c) => (
-              <div key={c.id} style={{ background: 'var(--bg-surface-elevated)', padding: '10px 14px', borderRadius: 'var(--radius-sm)' }}>
-                <div style={{ fontWeight: 600, color: '#F8FAFC', fontSize: '0.85rem' }}>{c.name}</div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '2px' }}>
+              <div key={c.id} style={{ background: 'var(--bg-surface-elevated)', padding: '8px 12px', borderRadius: 'var(--radius-sm)' }}>
+                <div style={{ fontWeight: 600, color: '#F8FAFC', fontSize: '0.82rem' }}>{c.name}</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '2px' }}>
                   {c.id} • {c.lat.toFixed(4)}, {c.lon.toFixed(4)} ({c.type})
                 </div>
               </div>
@@ -47,13 +43,9 @@ export const ProvenancePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Schema Definition */}
         <div className="card">
           <div className="card-header">
-            <div className="card-title">
-              <Database size={18} style={{ color: 'var(--accent-teal)' }} />
-              Canonical Data Schema
-            </div>
+            <div className="card-title">Canonical Data Schema</div>
           </div>
           <div className="table-container">
             <table className="data-table">
@@ -113,24 +105,18 @@ export const ProvenancePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Privacy & Data Governance */}
         <div className="card">
           <div className="card-header">
-            <div className="card-title">
-              <Lock size={18} style={{ color: 'var(--accent-teal)' }} />
-              Privacy & Data Governance Statement
-            </div>
+            <div className="card-title">Privacy & Legal Policies</div>
           </div>
-          <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
-            <p style={{ marginBottom: '10px' }}>
-              <strong>Zero Personally Identifiable Information (PII):</strong> UrbanPulse exclusively processes aggregated spatial traffic velocities, macroscopic traffic counts, and road segment indicators. No individual license plate recognition (ALPR), vehicle registration numbers, or individual driver GPS trajectories are ingested or stored.
+          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+            <p style={{ marginBottom: '8px' }}>
+              UrbanPulse processes only aggregated macroscopic traffic sensor speeds and vehicle counts. No personally identifiable information (PII) or GPS tracks are collected.
             </p>
-            <p style={{ marginBottom: '10px' }}>
-              <strong>Local Processing:</strong> All user-uploaded datasets remain securely within the user's provisioned local or containerized workspace and are never forwarded to third-party tracking services or external cloud endpoints without explicit configuration.
-            </p>
-            <p>
-              <strong>Reproducible Integrity:</strong> Every reported metric, classification decision, and association rule is derived from verified algorithmic computations executed against the active dataset.
-            </p>
+            <div style={{ display: 'flex', gap: '14px', marginTop: '10px' }}>
+              <NavLink to="/terms" className="btn btn-secondary" style={{ fontSize: '0.78rem' }}>View Terms of Service</NavLink>
+              <NavLink to="/privacy" className="btn btn-secondary" style={{ fontSize: '0.78rem' }}>View Privacy Policy</NavLink>
+            </div>
           </div>
         </div>
       </div>

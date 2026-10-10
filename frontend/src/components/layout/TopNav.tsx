@@ -1,6 +1,5 @@
 import React from 'react';
 import { Dataset } from '../../types';
-import { Database, RefreshCw } from 'lucide-react';
 
 interface TopNavProps {
   datasets: Dataset[];
@@ -22,7 +21,6 @@ export const TopNav: React.FC<TopNavProps> = ({
   return (
     <header className="top-nav">
       <div className="dataset-picker">
-        <Database size={16} style={{ color: 'var(--accent-teal)' }} />
         <span className="dataset-picker-label">Active Dataset:</span>
         <select
           className="dataset-select"
@@ -49,8 +47,7 @@ export const TopNav: React.FC<TopNavProps> = ({
           disabled={isLoading}
           title="Refresh analytics data"
         >
-          <RefreshCw size={14} className={isLoading ? 'spinner' : ''} />
-          <span>Refresh Data</span>
+          <span>{isLoading ? 'Reloading...' : 'Reload Data'}</span>
         </button>
       </div>
     </header>

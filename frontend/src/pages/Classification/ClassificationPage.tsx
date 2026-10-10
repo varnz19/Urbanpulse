@@ -3,7 +3,6 @@ import { PageHeader } from '../../components/layout/PageHeader';
 import { LoadingSkeleton, ErrorAlert } from '../../components/common/Feedback';
 import { runClassification, saveExperiment } from '../../services/api';
 import { ClassifyResponse } from '../../types';
-import { BrainCircuit, Check, Bookmark, Sparkles } from 'lucide-react';
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid
 } from 'recharts';
@@ -78,7 +77,6 @@ export const ClassificationPage: React.FC<ClassificationPageProps> = ({ datasetI
     );
   };
 
-  // Prepare feature importance data
   const fiData = result?.feature_importance
     ? Object.entries(result.feature_importance).map(([feature, importance]) => ({
         feature,
@@ -94,13 +92,10 @@ export const ClassificationPage: React.FC<ClassificationPageProps> = ({ datasetI
       />
 
       {/* Model Configuration Card */}
-      <div className="card" style={{ marginBottom: '24px' }}>
+      <div className="card" style={{ marginBottom: '20px' }}>
         <div className="card-header">
           <div>
-            <div className="card-title">
-              <BrainCircuit size={18} style={{ color: 'var(--accent-teal)' }} />
-              Classification Model Architecture
-            </div>
+            <div className="card-title">Classification Model Architecture</div>
             <div className="card-subtitle">Choose learning algorithm, depth limits, and predictor attributes</div>
           </div>
           <button
@@ -108,12 +103,11 @@ export const ClassificationPage: React.FC<ClassificationPageProps> = ({ datasetI
             onClick={handleRunModel}
             disabled={loading || featureCols.length === 0}
           >
-            <Sparkles size={14} />
-            <span>{loading ? 'Training & Evaluating...' : 'Train Model'}</span>
+            <span>{loading ? 'Fitting Model...' : 'Train Model'}</span>
           </button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginBottom: '14px' }}>
           <div className="form-group">
             <label className="form-label">Algorithm</label>
             <select
@@ -148,7 +142,7 @@ export const ClassificationPage: React.FC<ClassificationPageProps> = ({ datasetI
               step="0.05"
               value={testSize}
               onChange={(e) => setTestSize(Number(e.target.value))}
-              style={{ width: '100%', accentColor: 'var(--accent-teal)', marginTop: '8px' }}
+              style={{ width: '100%', accentColor: 'var(--accent-teal)', marginTop: '6px' }}
             />
           </div>
 
@@ -161,15 +155,15 @@ export const ClassificationPage: React.FC<ClassificationPageProps> = ({ datasetI
                 max="8"
                 value={maxDepth}
                 onChange={(e) => setMaxDepth(Number(e.target.value))}
-                style={{ width: '100%', accentColor: 'var(--accent-teal)', marginTop: '8px' }}
+                style={{ width: '100%', accentColor: 'var(--accent-teal)', marginTop: '6px' }}
               />
             </div>
           )}
         </div>
 
         <div>
-          <label className="form-label" style={{ marginBottom: '8px' }}>Input Features:</label>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+          <label className="form-label" style={{ marginBottom: '6px' }}>Input Features:</label>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
             {availableFeatures.map((f) => {
               const active = featureCols.includes(f.id);
               return (
@@ -178,20 +172,16 @@ export const ClassificationPage: React.FC<ClassificationPageProps> = ({ datasetI
                   type="button"
                   onClick={() => toggleFeature(f.id)}
                   style={{
-                    backgroundColor: active ? 'rgba(20, 184, 166, 0.15)' : 'var(--bg-surface-elevated)',
+                    backgroundColor: active ? 'var(--bg-surface-elevated)' : 'var(--bg-primary)',
                     border: `1px solid ${active ? 'var(--accent-teal)' : 'var(--border-color)'}`,
-                    color: active ? 'var(--accent-teal)' : 'var(--text-muted)',
+                    color: active ? '#F8FAFC' : 'var(--text-muted)',
                     borderRadius: 'var(--radius-sm)',
-                    padding: '6px 12px',
-                    fontSize: '0.82rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px'
+                    padding: '4px 10px',
+                    fontSize: '0.78rem',
+                    cursor: 'pointer'
                   }}
                 >
-                  {active && <Check size={12} />}
-                  <span>{f.label}</span>
+                  {f.label} {active ? '[x]' : '[ ]'}
                 </button>
               );
             })}
@@ -199,7 +189,7 @@ export const ClassificationPage: React.FC<ClassificationPageProps> = ({ datasetI
         </div>
       </div>
 
-      {loading && <LoadingSkeleton message="Fitting model, computing cross-validation, and compiling confusion matrix..." />}
+      {loading && <LoadingSkeleton message="Fitting classifier and evaluating cross-validation folds..." />}
       {error && <ErrorAlert message={error} />}
 
       {/* Model Performance Results */}
@@ -212,34 +202,34 @@ export const ClassificationPage: React.FC<ClassificationPageProps> = ({ datasetI
             justifyContent: 'space-between',
             backgroundColor: 'var(--bg-surface)',
             border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius-md)',
-            padding: '16px 20px',
-            marginBottom: '24px',
+            borderRadius: 'var(--radius-sm)',
+            padding: '14px 18px',
+            marginBottom: '20px',
             flexWrap: 'wrap',
             gap: '12px'
           }}>
-            <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
               <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Overall Accuracy</span>
-                <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#10B981' }}>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Overall Accuracy</span>
+                <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#059669' }}>
                   {(result.accuracy * 100).toFixed(1)}%
                 </div>
               </div>
               <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Macro F1-Score</span>
-                <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--accent-teal)' }}>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Macro F1-Score</span>
+                <div style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--accent-teal)' }}>
                   {result.macro_f1.toFixed(3)}
                 </div>
               </div>
               <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>5-Fold CV Accuracy</span>
-                <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#38BDF8' }}>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>5-Fold CV Accuracy</span>
+                <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#0284C7' }}>
                   {result.cv_mean_accuracy ? `${(result.cv_mean_accuracy * 100).toFixed(1)}%` : 'N/A'}
                 </div>
               </div>
               <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Evaluation Split</span>
-                <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#F8FAFC' }}>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Records (Train / Test)</span>
+                <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#F8FAFC' }}>
                   {result.total_train_samples} / {result.total_test_samples}
                 </div>
               </div>
@@ -250,14 +240,12 @@ export const ClassificationPage: React.FC<ClassificationPageProps> = ({ datasetI
               onClick={handleSaveExperiment}
               disabled={savedSuccess}
             >
-              <Bookmark size={14} />
-              <span>{savedSuccess ? '✓ Saved to Experiments' : 'Save Experiment'}</span>
+              <span>{savedSuccess ? '[OK] Saved' : 'Save Experiment'}</span>
             </button>
           </div>
 
           {/* Confusion Matrix & Per-Class Metrics */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
-            {/* Confusion Matrix Table */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
             <div className="card">
               <div className="card-header">
                 <div>
@@ -285,8 +273,8 @@ export const ClassificationPage: React.FC<ClassificationPageProps> = ({ datasetI
                             <td
                               key={j}
                               style={{
-                                backgroundColor: isDiagonal && val > 0 ? 'rgba(20, 184, 166, 0.2)' : 'transparent',
-                                color: isDiagonal ? '#14B8A6' : (val > 0 ? '#EF4444' : 'var(--text-dim)'),
+                                backgroundColor: isDiagonal && val > 0 ? 'rgba(13, 148, 136, 0.2)' : 'transparent',
+                                color: isDiagonal ? '#0D9488' : (val > 0 ? '#DC2626' : 'var(--text-dim)'),
                                 fontWeight: isDiagonal ? 700 : 400
                               }}
                             >
@@ -301,7 +289,6 @@ export const ClassificationPage: React.FC<ClassificationPageProps> = ({ datasetI
               </div>
             </div>
 
-            {/* Per-Class Metrics */}
             <div className="card">
               <div className="card-header">
                 <div>
@@ -342,26 +329,26 @@ export const ClassificationPage: React.FC<ClassificationPageProps> = ({ datasetI
           </div>
 
           {/* Feature Importance & Explainable Decision Rules */}
-          <div style={{ display: 'grid', gridTemplateColumns: fiData.length > 0 ? '1fr 1fr' : '1fr', gap: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: fiData.length > 0 ? '1fr 1fr' : '1fr', gap: '16px' }}>
             {fiData.length > 0 && (
               <div className="card">
                 <div className="card-header">
                   <div>
                     <div className="card-title">Gini Feature Importance</div>
-                    <div className="card-subtitle">Relative contribution of attributes to class splits</div>
+                    <div className="card-subtitle">Contribution of attributes to split criteria</div>
                   </div>
                 </div>
-                <div style={{ height: '260px' }}>
+                <div style={{ height: '240px' }}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={fiData} layout="vertical" margin={{ left: 30, right: 20 }}>
-                      <CartesianGrid stroke="#1E293B" horizontal={false} />
+                    <BarChart data={fiData} layout="vertical" margin={{ left: 24, right: 16 }}>
+                      <CartesianGrid stroke="#1C2B40" horizontal={false} />
                       <XAxis type="number" stroke="#64748B" />
                       <YAxis dataKey="feature" type="category" stroke="#64748B" width={110} />
                       <Tooltip
-                        contentStyle={{ backgroundColor: '#111C2E', borderColor: '#1E293B', borderRadius: '6px', color: '#F8FAFC' }}
+                        contentStyle={{ backgroundColor: '#111C2E', borderColor: '#24344D', borderRadius: '2px', color: '#F8FAFC' }}
                         formatter={(val: any) => [val, 'Importance']}
                       />
-                      <Bar dataKey="importance" fill="#14B8A6" radius={[0, 4, 4, 0]} />
+                      <Bar dataKey="importance" fill="#0D9488" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -372,19 +359,19 @@ export const ClassificationPage: React.FC<ClassificationPageProps> = ({ datasetI
               <div className="card">
                 <div className="card-header">
                   <div>
-                    <div className="card-title">Explainable Decision Rules (Tree Paths)</div>
-                    <div className="card-subtitle">Human-interpretable decision logic</div>
+                    <div className="card-title">Decision Tree Rules</div>
+                    <div className="card-subtitle">Extracted IF-THEN conditional splits</div>
                   </div>
                 </div>
                 <pre style={{
                   backgroundColor: '#0B1220',
                   border: '1px solid var(--border-color)',
                   borderRadius: 'var(--radius-sm)',
-                  padding: '14px',
+                  padding: '12px',
                   color: '#38BDF8',
-                  fontSize: '0.78rem',
-                  lineHeight: '1.6',
-                  maxHeight: '260px',
+                  fontSize: '0.75rem',
+                  lineHeight: '1.5',
+                  maxHeight: '240px',
                   overflowY: 'auto',
                   fontFamily: 'monospace'
                 }}>

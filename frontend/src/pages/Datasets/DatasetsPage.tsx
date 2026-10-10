@@ -3,7 +3,6 @@ import { PageHeader } from '../../components/layout/PageHeader';
 import { LoadingSkeleton, ErrorAlert } from '../../components/common/Feedback';
 import { fetchDataset, fetchDatasetPreview, uploadDataset, preprocessDataset } from '../../services/api';
 import { Dataset, DatasetPreview, PreprocessResult } from '../../types';
-import { Upload, Sliders, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 
 interface DatasetsPageProps {
   datasetId: string;
@@ -72,7 +71,7 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({ datasetId, onDataset
 
     try {
       const res = await uploadDataset(file);
-      setUploadSuccess(`Successfully ingested ${res.name} (${res.row_count} rows, ${res.column_count} columns)`);
+      setUploadSuccess(`Ingested ${res.name} (${res.row_count} rows, ${res.column_count} columns)`);
       onDatasetUploaded();
     } catch (err: any) {
       setUploadError(err.message || 'Failed to upload dataset');
@@ -116,27 +115,23 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({ datasetId, onDataset
     <div>
       <PageHeader
         title="Dataset Workspace & Feature Preparation"
-        description="Inspect schema metadata, profile column distributions, view raw observation records, and configure a reproducible data cleaning pipeline."
+        description="Inspect schema metadata, profile column distributions, view observation records, and configure reproducible data cleaning."
       />
 
       {/* Upload & Ingestion Strip */}
-      <div className="card" style={{ marginBottom: '24px' }}>
+      <div className="card" style={{ marginBottom: '20px' }}>
         <div className="card-header">
           <div>
-            <div className="card-title">
-              <Upload size={18} style={{ color: 'var(--accent-teal)' }} />
-              Ingest New Traffic Corpus
-            </div>
+            <div className="card-title">Ingest Traffic Corpus</div>
             <div className="card-subtitle">
-              Upload local CSV or ARFF datasets with timestamps, speed/volume metrics, or coordinates
+              Upload local CSV or ARFF files with timestamps, velocities, volume, or spatial coordinates
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
           <label className="btn btn-primary" style={{ cursor: 'pointer' }}>
-            <Upload size={14} />
-            <span>{uploading ? 'Processing & Validating...' : 'Select File (.csv or .arff)'}</span>
+            <span>{uploading ? 'Processing File...' : 'Upload File (.csv or .arff)'}</span>
             <input
               type="file"
               accept=".csv,.arff"
@@ -145,36 +140,36 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({ datasetId, onDataset
               style={{ display: 'none' }}
             />
           </label>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
-            Max file limit 50MB. Automatic column type inference & schema validation applied.
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>
+            Max file limit 50MB. Automatic schema verification and column inference applied.
           </span>
         </div>
 
         {uploadError && (
-          <div style={{ marginTop: '14px' }}>
+          <div style={{ marginTop: '12px' }}>
             <ErrorAlert message={uploadError} />
           </div>
         )}
         {uploadSuccess && (
           <div style={{
-            marginTop: '14px',
-            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
+            marginTop: '12px',
+            backgroundColor: 'rgba(5, 150, 105, 0.15)',
+            border: '1px solid #059669',
             borderRadius: 'var(--radius-sm)',
-            padding: '10px 14px',
+            padding: '8px 12px',
             color: '#10B981',
-            fontSize: '0.85rem'
+            fontSize: '0.82rem'
           }}>
-            ✓ {uploadSuccess}
+            [OK] {uploadSuccess}
           </div>
         )}
       </div>
 
-      {/* Data Profiling Table */}
-      <div className="card" style={{ marginBottom: '24px' }}>
+      {/* Column Profile Table */}
+      <div className="card" style={{ marginBottom: '20px' }}>
         <div className="card-header">
           <div>
-            <div className="card-title">Column Profile & Data Quality Audit</div>
+            <div className="card-title">Column Profile & Data Hygiene Audit</div>
             <div className="card-subtitle">
               Inferred data types, missingness rates, unique cardinalities, and numerical boundaries
             </div>
@@ -206,9 +201,9 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({ datasetId, onDataset
                   </td>
                   <td>
                     {col.missing_count === 0 ? (
-                      <span style={{ color: '#10B981' }}>0 (0%)</span>
+                      <span style={{ color: '#059669' }}>0 (0%)</span>
                     ) : (
-                      <span style={{ color: '#EF4444' }}>{col.missing_count} ({col.missing_pct}%)</span>
+                      <span style={{ color: '#DC2626' }}>{col.missing_count} ({col.missing_pct}%)</span>
                     )}
                   </td>
                   <td>{col.unique_count.toLocaleString()}</td>
@@ -216,19 +211,19 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({ datasetId, onDataset
                     {col.min_val !== null && col.max_val !== null ? (
                       <span>{col.min_val} to {col.max_val}</span>
                     ) : (
-                      <span style={{ color: 'var(--text-dim)' }}>—</span>
+                      <span style={{ color: 'var(--text-dim)' }}>-</span>
                     )}
                   </td>
                   <td>
                     {col.mean_val !== null ? (
                       <span>{col.mean_val} ± {col.std_val}</span>
                     ) : (
-                      <span style={{ color: 'var(--text-dim)' }}>—</span>
+                      <span style={{ color: 'var(--text-dim)' }}>-</span>
                     )}
                   </td>
                   <td>
                     <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                      {col.sample_values?.slice(0, 3).join(', ') || '—'}
+                      {col.sample_values?.slice(0, 3).join(', ') || '-'}
                     </span>
                   </td>
                 </tr>
@@ -240,12 +235,12 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({ datasetId, onDataset
 
       {/* Paginated Dataset Preview */}
       {preview && (
-        <div className="card" style={{ marginBottom: '24px' }}>
+        <div className="card" style={{ marginBottom: '20px' }}>
           <div className="card-header">
             <div>
               <div className="card-title">Observation Records Preview</div>
               <div className="card-subtitle">
-                Showing rows {((page - 1) * preview.page_size) + 1} to {Math.min(page * preview.page_size, preview.total_rows)} of {preview.total_rows.toLocaleString()}
+                Rows {((page - 1) * preview.page_size) + 1} to {Math.min(page * preview.page_size, preview.total_rows)} of {preview.total_rows.toLocaleString()}
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -253,20 +248,20 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({ datasetId, onDataset
                 className="btn btn-secondary"
                 disabled={page <= 1}
                 onClick={() => handlePageChange(page - 1)}
-                style={{ padding: '6px 10px' }}
+                style={{ padding: '4px 10px' }}
               >
-                <ChevronLeft size={16} />
+                Prev
               </button>
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                 Page {page} of {Math.ceil(preview.total_rows / preview.page_size)}
               </span>
               <button
                 className="btn btn-secondary"
                 disabled={page >= Math.ceil(preview.total_rows / preview.page_size)}
                 onClick={() => handlePageChange(page + 1)}
-                style={{ padding: '6px 10px' }}
+                style={{ padding: '4px 10px' }}
               >
-                <ChevronRight size={16} />
+                Next
               </button>
             </div>
           </div>
@@ -285,7 +280,7 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({ datasetId, onDataset
                   <tr key={idx}>
                     {preview.columns.map((c) => (
                       <td key={c}>
-                        {row[c] !== null && row[c] !== undefined ? String(row[c]) : <span style={{ color: '#EF4444' }}>null</span>}
+                        {row[c] !== null && row[c] !== undefined ? String(row[c]) : <span style={{ color: '#DC2626' }}>null</span>}
                       </td>
                     ))}
                   </tr>
@@ -300,10 +295,7 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({ datasetId, onDataset
       <div className="card">
         <div className="card-header">
           <div>
-            <div className="card-title">
-              <Sliders size={18} style={{ color: 'var(--accent-teal)' }} />
-              Feature Engineering & Preprocessing Pipeline
-            </div>
+            <div className="card-title">Feature Engineering & Preprocessing Pipeline</div>
             <div className="card-subtitle">
               Configure deterministic data cleaning, missing imputation, outlier boundaries, and scaling
             </div>
@@ -313,11 +305,11 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({ datasetId, onDataset
             onClick={handleRunPreprocessing}
             disabled={preprocLoading}
           >
-            {preprocLoading ? 'Running Pipeline...' : 'Execute Preprocessing'}
+            {preprocLoading ? 'Processing...' : 'Execute Preprocessing'}
           </button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginBottom: '16px' }}>
           <div className="form-group">
             <label className="form-label">Missing Value Imputation</label>
             <select
@@ -339,7 +331,7 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({ datasetId, onDataset
               value={outlierHandling}
               onChange={(e) => setOutlierHandling(e.target.value)}
             >
-              <option value="clip_iqr">Clip at 1.5x IQR (Recommended)</option>
+              <option value="clip_iqr">Clip at 1.5x IQR</option>
               <option value="drop_zscore">Filter Rows with |Z| &gt; 3</option>
               <option value="none">No Outlier Transformation</option>
             </select>
@@ -373,10 +365,9 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({ datasetId, onDataset
           </div>
         </div>
 
-        {/* Feature Selector */}
-        <div style={{ marginBottom: '20px' }}>
-          <div className="form-label" style={{ marginBottom: '8px' }}>Active Features for Model Fitting:</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+        <div style={{ marginBottom: '16px' }}>
+          <div className="form-label" style={{ marginBottom: '6px' }}>Active Features for Model Fitting:</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
             {dataset.columns.map((col) => {
               const active = selectedFeatures.includes(col.name);
               return (
@@ -385,82 +376,55 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({ datasetId, onDataset
                   type="button"
                   onClick={() => toggleFeature(col.name)}
                   style={{
-                    backgroundColor: active ? 'rgba(20, 184, 166, 0.15)' : 'var(--bg-surface-elevated)',
+                    backgroundColor: active ? 'var(--bg-surface-elevated)' : 'var(--bg-primary)',
                     border: `1px solid ${active ? 'var(--accent-teal)' : 'var(--border-color)'}`,
-                    color: active ? 'var(--accent-teal)' : 'var(--text-muted)',
+                    color: active ? '#F8FAFC' : 'var(--text-muted)',
                     borderRadius: 'var(--radius-sm)',
-                    padding: '6px 12px',
-                    fontSize: '0.8rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px'
+                    padding: '4px 10px',
+                    fontSize: '0.78rem',
+                    cursor: 'pointer'
                   }}
                 >
-                  {active && <Check size={12} />}
-                  <span>{col.name}</span>
+                  {col.name} {active ? '[x]' : '[ ]'}
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Preprocessing Results Output */}
         {preprocResult && (
           <div style={{
             backgroundColor: 'var(--bg-surface-elevated)',
             border: '1px solid var(--border-color)',
             borderRadius: 'var(--radius-sm)',
-            padding: '16px',
-            marginTop: '16px'
+            padding: '14px',
+            marginTop: '12px'
           }}>
-            <div style={{ fontWeight: 600, color: '#F8FAFC', marginBottom: '8px' }}>
-              ✓ Transformation Completed
+            <div style={{ fontWeight: 600, color: '#F8FAFC', marginBottom: '6px' }}>
+              [OK] Transformations Applied
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginBottom: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '10px', marginBottom: '10px' }}>
               <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Row Count Delta:</span>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>Row Delta:</span>
                 <div style={{ fontWeight: 600, color: '#F8FAFC' }}>
-                  {preprocResult.original_rows} → {preprocResult.processed_rows}
+                  {preprocResult.original_rows} to {preprocResult.processed_rows}
                 </div>
               </div>
               <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Feature Columns:</span>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>Feature Columns:</span>
                 <div style={{ fontWeight: 600, color: '#F8FAFC' }}>
-                  {preprocResult.original_cols} → {preprocResult.processed_cols}
+                  {preprocResult.original_cols} to {preprocResult.processed_cols}
                 </div>
               </div>
             </div>
 
-            <div style={{ marginBottom: '12px' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Transformations Applied:</span>
-              <ul style={{ margin: '6px 0 0 18px', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+            <div style={{ marginBottom: '10px' }}>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>Transformations:</span>
+              <ul style={{ margin: '4px 0 0 16px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                 {preprocResult.transformations_applied.map((t, idx) => (
                   <li key={idx}>{t}</li>
                 ))}
               </ul>
-            </div>
-
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '6px' }}>Transformed Matrix Sample:</div>
-            <div className="table-container" style={{ maxHeight: '180px' }}>
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    {preprocResult.columns.slice(0, 8).map(c => <th key={c}>{c}</th>)}
-                  </tr>
-                </thead>
-                <tbody>
-                  {preprocResult.sample_preview.slice(0, 5).map((row, idx) => (
-                    <tr key={idx}>
-                      {preprocResult.columns.slice(0, 8).map(c => (
-                        <td key={c}>
-                          {typeof row[c] === 'number' ? Number(row[c]).toFixed(3) : String(row[c] ?? '')}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
             </div>
           </div>
         )}

@@ -3,7 +3,6 @@ import { PageHeader } from '../../components/layout/PageHeader';
 import { LoadingSkeleton, ErrorAlert } from '../../components/common/Feedback';
 import { runAnomalyDetection, saveExperiment } from '../../services/api';
 import { AnomalyResponse } from '../../types';
-import { AlertTriangle, Sparkles, Bookmark, ShieldAlert } from 'lucide-react';
 import {
   ResponsiveContainer, ScatterChart, Scatter, XAxis, YAxis, Tooltip, CartesianGrid
 } from 'recharts';
@@ -51,7 +50,7 @@ export const AnomaliesPage: React.FC<AnomaliesPageProps> = ({ datasetId }) => {
         task_type: 'anomaly',
         parameters: { method, contamination, metric_column: metricCol },
         metrics: { anomalies_count: result.anomalies_count, anomaly_rate_pct: result.anomaly_rate_pct },
-        results_summary: `Identified ${result.anomalies_count} anomalies (${result.anomaly_rate_pct}% anomaly rate) in ${metricCol}.`
+        results_summary: `Identified ${result.anomalies_count} anomalies (${result.anomaly_rate_pct}% rate) in ${metricCol}.`
       });
       setSavedSuccess(true);
     } catch (err: any) {
@@ -70,46 +69,34 @@ export const AnomaliesPage: React.FC<AnomaliesPageProps> = ({ datasetId }) => {
         description="Detect statistical outliers and abrupt velocity drops using Isolation Forest and historical rolling baseline deviation scores."
       />
 
-      {/* Verification Notice */}
       <div style={{
-        backgroundColor: 'rgba(56, 189, 248, 0.08)',
-        border: '1px solid rgba(56, 189, 248, 0.25)',
+        backgroundColor: 'rgba(2, 132, 199, 0.1)',
+        border: '1px solid #0284C7',
         borderRadius: 'var(--radius-sm)',
-        padding: '12px 16px',
+        padding: '10px 14px',
         color: '#7DD3FC',
-        fontSize: '0.82rem',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        marginBottom: '20px'
+        fontSize: '0.8rem',
+        marginBottom: '16px'
       }}>
-        <ShieldAlert size={18} style={{ color: '#38BDF8', flexShrink: 0 }} />
-        <span>
-          <strong>Operational Distinction:</strong> Statistical deviations indicate atypical sensor patterns relative to diurnal baselines. They represent candidates for investigation, not ground-truth verified physical accidents or lane closures.
-        </span>
+        <strong>Operational Distinction:</strong> Statistical deviations indicate atypical sensor patterns relative to diurnal baselines. They represent candidates for investigation, not ground-truth verified physical incidents.
       </div>
 
-      {/* Detection Configuration */}
-      <div className="card" style={{ marginBottom: '24px' }}>
+      <div className="card" style={{ marginBottom: '20px' }}>
         <div className="card-header">
           <div>
-            <div className="card-title">
-              <AlertTriangle size={18} style={{ color: 'var(--accent-teal)' }} />
-              Anomaly Detection Engine Configuration
-            </div>
-            <div className="card-subtitle">Choose detection algorithm, expected contamination rate, and evaluated metric</div>
+            <div className="card-title">Anomaly Detection Engine Configuration</div>
+            <div className="card-subtitle">Choose detection algorithm, contamination rate, and evaluated metric</div>
           </div>
           <button
             className="btn btn-primary"
             onClick={handleRunDetection}
             disabled={loading}
           >
-            <Sparkles size={14} />
-            <span>{loading ? 'Executing Detection...' : 'Run Anomaly Detection'}</span>
+            <span>{loading ? 'Evaluating...' : 'Run Anomaly Detection'}</span>
           </button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
           <div className="form-group">
             <label className="form-label">Algorithm</label>
             <select
@@ -135,7 +122,7 @@ export const AnomaliesPage: React.FC<AnomaliesPageProps> = ({ datasetId }) => {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Expected Contamination: {(contamination * 100).toFixed(0)}%</label>
+            <label className="form-label">Contamination Limit: {(contamination * 100).toFixed(0)}%</label>
             <input
               type="range"
               min="0.01"
@@ -143,53 +130,51 @@ export const AnomaliesPage: React.FC<AnomaliesPageProps> = ({ datasetId }) => {
               step="0.01"
               value={contamination}
               onChange={(e) => setContamination(Number(e.target.value))}
-              style={{ width: '100%', accentColor: 'var(--accent-teal)', marginTop: '8px' }}
+              style={{ width: '100%', accentColor: 'var(--accent-teal)', marginTop: '6px' }}
             />
           </div>
         </div>
       </div>
 
-      {loading && <LoadingSkeleton message="Computing Isolation Forest trees and historical baseline deviations..." />}
+      {loading && <LoadingSkeleton message="Computing Isolation Forest and rolling baseline deviations..." />}
       {error && <ErrorAlert message={error} />}
 
-      {/* Results */}
       {result && !loading && (
         <>
-          {/* Summary Banner */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             backgroundColor: 'var(--bg-surface)',
             border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius-md)',
-            padding: '16px 20px',
-            marginBottom: '24px',
+            borderRadius: 'var(--radius-sm)',
+            padding: '14px 18px',
+            marginBottom: '20px',
             flexWrap: 'wrap',
             gap: '12px'
           }}>
-            <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
               <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Records Evaluated</span>
-                <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#F8FAFC' }}>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Records Evaluated</span>
+                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#F8FAFC' }}>
                   {result.total_records.toLocaleString()}
                 </div>
               </div>
               <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Anomalies Flagged</span>
-                <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#EF4444' }}>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Anomalies Flagged</span>
+                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#DC2626' }}>
                   {result.anomalies_count}
                 </div>
               </div>
               <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Anomaly Rate</span>
-                <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--accent-teal)' }}>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Anomaly Rate</span>
+                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--accent-teal)' }}>
                   {result.anomaly_rate_pct}%
                 </div>
               </div>
               <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Method Applied</span>
-                <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#38BDF8', marginTop: '4px' }}>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Method</span>
+                <div style={{ fontSize: '1rem', fontWeight: 600, color: '#0284C7', marginTop: '2px' }}>
                   {result.method_used === 'isolation_forest' ? 'Isolation Forest' : 'Z-Score Deviation'}
                 </div>
               </div>
@@ -200,13 +185,11 @@ export const AnomaliesPage: React.FC<AnomaliesPageProps> = ({ datasetId }) => {
               onClick={handleSaveExperiment}
               disabled={savedSuccess}
             >
-              <Bookmark size={14} />
-              <span>{savedSuccess ? '✓ Saved to Experiments' : 'Save Run'}</span>
+              <span>{savedSuccess ? '[OK] Saved' : 'Save Experiment'}</span>
             </button>
           </div>
 
-          {/* Anomaly Timeline Scatter */}
-          <div className="card" style={{ marginBottom: '24px' }}>
+          <div className="card" style={{ marginBottom: '20px' }}>
             <div className="card-header">
               <div>
                 <div className="card-title">Anomaly Deviation Timeline</div>
@@ -215,15 +198,15 @@ export const AnomaliesPage: React.FC<AnomaliesPageProps> = ({ datasetId }) => {
                 </div>
               </div>
             </div>
-            <div style={{ height: '240px' }}>
+            <div style={{ height: '220px' }}>
               <ResponsiveContainer width="100%" height="100%">
-                <ScatterChart margin={{ top: 10, right: 20, bottom: 20, left: 10 }}>
-                  <CartesianGrid stroke="#1E293B" />
-                  <XAxis dataKey="index" name="Observation Index" stroke="#64748B" />
+                <ScatterChart margin={{ top: 10, right: 16, bottom: 16, left: 10 }}>
+                  <CartesianGrid stroke="#1C2B40" strokeDasharray="2 2" />
+                  <XAxis dataKey="index" name="Index" stroke="#64748B" />
                   <YAxis dataKey="anomaly_score" name="Anomaly Score" stroke="#64748B" domain={[0, 1]} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#111C2E', borderColor: '#1E293B', borderRadius: '6px', color: '#F8FAFC' }}
-                    formatter={(_val: any, _name: string, entry: any) => {
+                    contentStyle={{ backgroundColor: '#111C2E', borderColor: '#24344D', borderRadius: '2px', color: '#F8FAFC' }}
+                    formatter={(_val: any, _name: any, entry: any) => {
                       const p = entry.payload;
                       return [
                         `${p.segment_name} | Obs: ${p.observed_value} vs Base: ${p.baseline_value} (${p.deviation_pct}%)`,
@@ -231,25 +214,24 @@ export const AnomaliesPage: React.FC<AnomaliesPageProps> = ({ datasetId }) => {
                       ];
                     }}
                   />
-                  <Scatter data={result.anomalies} fill="#EF4444" />
+                  <Scatter data={result.anomalies} fill="#DC2626" />
                 </ScatterChart>
               </ResponsiveContainer>
             </div>
           </div>
 
-          {/* Filterable Table */}
           <div className="card">
             <div className="card-header">
               <div>
                 <div className="card-title">Flagged Outlier Records</div>
-                <div className="card-subtitle">Detailed corroboration evidence and historical baseline comparisons</div>
+                <div className="card-subtitle">Supporting evidence and historical baseline comparisons</div>
               </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ display: 'flex', gap: '6px' }}>
                 {['ALL', 'Critical', 'High', 'Moderate'].map((sev) => (
                   <button
                     key={sev}
                     className={`btn ${severityFilter === sev ? 'btn-primary' : 'btn-secondary'}`}
-                    style={{ padding: '4px 10px', fontSize: '0.78rem' }}
+                    style={{ padding: '3px 8px', fontSize: '0.75rem' }}
                     onClick={() => setSeverityFilter(sev)}
                   >
                     {sev}
@@ -275,18 +257,18 @@ export const AnomaliesPage: React.FC<AnomaliesPageProps> = ({ datasetId }) => {
                 <tbody>
                   {filteredAnomalies.map((anom) => (
                     <tr key={anom.index}>
-                      <td style={{ color: 'var(--text-dim)', fontSize: '0.78rem' }}>{anom.timestamp}</td>
+                      <td style={{ color: 'var(--text-dim)', fontSize: '0.75rem' }}>{anom.timestamp}</td>
                       <td>
                         <strong style={{ color: '#F8FAFC' }}>{anom.segment_name}</strong>
                       </td>
                       <td>
-                        <strong style={{ color: anom.observed_value < anom.baseline_value ? '#EF4444' : '#10B981' }}>
+                        <strong style={{ color: anom.observed_value < anom.baseline_value ? '#DC2626' : '#059669' }}>
                           {anom.observed_value}
                         </strong>
                       </td>
                       <td>{anom.baseline_value}</td>
                       <td>
-                        <span style={{ color: anom.deviation_pct < 0 ? '#EF4444' : '#F59E0B' }}>
+                        <span style={{ color: anom.deviation_pct < 0 ? '#DC2626' : '#D97706' }}>
                           {anom.deviation_pct}%
                         </span>
                       </td>
@@ -296,7 +278,7 @@ export const AnomaliesPage: React.FC<AnomaliesPageProps> = ({ datasetId }) => {
                           {anom.severity}
                         </span>
                       </td>
-                      <td style={{ maxWidth: '320px', whiteSpace: 'normal', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                      <td style={{ maxWidth: '320px', whiteSpace: 'normal', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                         {anom.supporting_evidence}
                       </td>
                     </tr>
