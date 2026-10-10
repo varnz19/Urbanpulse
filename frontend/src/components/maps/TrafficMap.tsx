@@ -30,7 +30,7 @@ export const TrafficMap: React.FC<TrafficMapProps> = ({ corridors, height = '440
         center={center}
         zoom={12}
         scrollWheelZoom={false}
-        style={{ height: '100%', width: '100%', background: '#0B1220' }}
+        style={{ height: '100%', width: '100%', background: '#E2E8F0' }}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -47,32 +47,32 @@ export const TrafficMap: React.FC<TrafficMapProps> = ({ corridors, height = '440
               center={[c.latitude, c.longitude]}
               radius={8}
               pathOptions={{
-                color: '#1E293B',
-                weight: 1.5,
+                color: '#FFFFFF',
+                weight: 2,
                 fillColor: color,
-                fillOpacity: 0.9,
+                fillOpacity: 0.95,
               }}
             >
               <Popup className="custom-map-popup">
                 <div style={{ minWidth: '180px', padding: '2px' }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#F8FAFC', marginBottom: '3px' }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0F172A', marginBottom: '3px' }}>
                     {c.segment_name}
                   </div>
-                  <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginBottom: '8px' }}>
+                  <div style={{ fontSize: '0.72rem', color: '#64748B', marginBottom: '8px' }}>
                     {c.road_type || 'Arterial Corridor'} • ID: {c.segment_id}
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '0.75rem' }}>
                     <div>
                       <span style={{ color: '#64748B' }}>Avg Speed:</span><br />
-                      <strong style={{ color: '#F8FAFC' }}>{c.avg_speed} km/h</strong>
+                      <strong style={{ color: '#0F172A' }}>{c.avg_speed} km/h</strong>
                     </div>
                     <div>
                       <span style={{ color: '#64748B' }}>Volume:</span><br />
-                      <strong style={{ color: '#F8FAFC' }}>{c.avg_volume} veh/h</strong>
+                      <strong style={{ color: '#0F172A' }}>{c.avg_volume} veh/h</strong>
                     </div>
                   </div>
                   <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.7rem', color: '#94A3B8' }}>{c.observation_count} obs</span>
+                    <span style={{ fontSize: '0.7rem', color: '#64748B' }}>{c.observation_count} obs</span>
                     <span className={`badge badge-${c.dominant_congestion?.toLowerCase() || 'neutral'}`}>
                       {c.dominant_congestion}
                     </span>
@@ -84,35 +84,36 @@ export const TrafficMap: React.FC<TrafficMapProps> = ({ corridors, height = '440
         })}
       </MapContainer>
 
-      {/* Map Legend Overlay - No Drop Shadows, Sharp Radius */}
+      {/* Map Legend Overlay */}
       <div style={{
         position: 'absolute',
         bottom: '12px',
         right: '12px',
-        backgroundColor: '#111C2E',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
         border: '1px solid var(--border-color)',
         padding: '8px 12px',
         borderRadius: 'var(--radius-sm)',
         zIndex: 1000,
         fontSize: '0.72rem',
+        boxShadow: '0 2px 6px rgba(15, 23, 42, 0.08)'
       }}>
-        <div style={{ fontWeight: 600, color: '#F8FAFC', marginBottom: '6px' }}>Congestion State</div>
+        <div style={{ fontWeight: 700, color: '#0F172A', marginBottom: '6px' }}>Congestion State</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ width: '8px', height: '8px', background: '#059669' }} />
-            <span>Low (&gt; 38 km/h)</span>
+            <span style={{ width: '8px', height: '8px', borderRadius: '2px', background: '#059669' }} />
+            <span style={{ color: '#334155' }}>Low (&gt; 38 km/h)</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ width: '8px', height: '8px', background: '#0284C7' }} />
-            <span>Moderate (28 - 38 km/h)</span>
+            <span style={{ width: '8px', height: '8px', borderRadius: '2px', background: '#0284C7' }} />
+            <span style={{ color: '#334155' }}>Moderate (28 - 38 km/h)</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ width: '8px', height: '8px', background: '#D97706' }} />
-            <span>High (18 - 28 km/h)</span>
+            <span style={{ width: '8px', height: '8px', borderRadius: '2px', background: '#D97706' }} />
+            <span style={{ color: '#334155' }}>High (18 - 28 km/h)</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ width: '8px', height: '8px', background: '#DC2626' }} />
-            <span>Severe (&lt; 18 km/h)</span>
+            <span style={{ width: '8px', height: '8px', borderRadius: '2px', background: '#DC2626' }} />
+            <span style={{ color: '#334155' }}>Severe (&lt; 18 km/h)</span>
           </div>
         </div>
       </div>

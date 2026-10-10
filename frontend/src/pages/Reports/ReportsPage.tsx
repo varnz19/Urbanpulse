@@ -57,7 +57,7 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ datasetId }) => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
               <span className="badge badge-mod" style={{ marginBottom: '6px' }}>Executive Briefing</span>
-              <h2 style={{ fontSize: '1.4rem', color: '#F8FAFC', marginBottom: '4px' }}>
+              <h2 style={{ fontSize: '1.4rem', color: 'var(--text-main)', marginBottom: '4px' }}>
                 {report.title}
               </h2>
               <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
@@ -66,27 +66,27 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ datasetId }) => {
             </div>
             <div style={{ textAlign: 'right', fontSize: '0.75rem', color: 'var(--text-dim)' }}>
               <div>UrbanPulse Engine</div>
-              <div style={{ color: 'var(--accent-teal)' }}>Verified Computation</div>
+              <div style={{ color: 'var(--accent-cyan)' }}>Verified Computation</div>
             </div>
           </div>
         </div>
 
         <section style={{ marginBottom: '24px' }}>
-          <h3 style={{ fontSize: '0.98rem', color: '#F8FAFC', marginBottom: '10px', borderBottom: '1px solid var(--border-color)', paddingBottom: '4px' }}>
+          <h3 style={{ fontSize: '0.98rem', color: 'var(--text-main)', marginBottom: '10px', borderBottom: '1px solid var(--border-color)', paddingBottom: '4px' }}>
             1. Investigation Scope & Data Hygiene
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', background: 'var(--bg-surface-elevated)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
             <div>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>Total Observations:</span>
-              <div style={{ fontWeight: 700, color: '#F8FAFC' }}>{report.dataset_meta.total_records.toLocaleString()}</div>
+              <div style={{ fontWeight: 700, color: 'var(--text-main)' }}>{report.dataset_meta.total_records.toLocaleString()}</div>
             </div>
             <div>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>Monitored Corridors:</span>
-              <div style={{ fontWeight: 700, color: '#F8FAFC' }}>{report.dataset_meta.unique_corridors} Corridors</div>
+              <div style={{ fontWeight: 700, color: 'var(--text-main)' }}>{report.dataset_meta.unique_corridors} Corridors</div>
             </div>
             <div>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>Coverage Period:</span>
-              <div style={{ fontWeight: 700, color: '#F8FAFC' }}>{report.dataset_meta.date_coverage}</div>
+              <div style={{ fontWeight: 700, color: 'var(--text-main)' }}>{report.dataset_meta.date_coverage}</div>
             </div>
             <div>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>Data Completeness:</span>
@@ -96,7 +96,7 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ datasetId }) => {
         </section>
 
         <section style={{ marginBottom: '24px' }}>
-          <h3 style={{ fontSize: '0.98rem', color: '#F8FAFC', marginBottom: '10px', borderBottom: '1px solid var(--border-color)', paddingBottom: '4px' }}>
+          <h3 style={{ fontSize: '0.98rem', color: 'var(--text-main)', marginBottom: '10px', borderBottom: '1px solid var(--border-color)', paddingBottom: '4px' }}>
             2. System-Wide Network Performance
           </h3>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '12px', lineHeight: 1.5 }}>
@@ -106,7 +106,7 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ datasetId }) => {
             {Object.entries(report.network_performance.congestion_distribution).map(([c, count]: any) => (
               <div key={c} style={{ background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-color)', padding: '8px 12px', borderRadius: 'var(--radius-sm)' }}>
                 <span className={`badge badge-${c.toLowerCase()}`} style={{ marginBottom: '3px' }}>{c}</span>
-                <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#F8FAFC' }}>{count}</div>
+                <div style={{ fontWeight: 700, fontSize: '1.1rem', color: 'var(--text-main)' }}>{count}</div>
               </div>
             ))}
           </div>
@@ -145,7 +145,7 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ datasetId }) => {
         </section>
 
         <section>
-          <h3 style={{ fontSize: '0.98rem', color: '#F8FAFC', marginBottom: '10px', borderBottom: '1px solid var(--border-color)', paddingBottom: '4px' }}>
+          <h3 style={{ fontSize: '0.98rem', color: 'var(--text-main)', marginBottom: '10px', borderBottom: '1px solid var(--border-color)', paddingBottom: '4px' }}>
             4. Methodological Provenance & Caveats
           </h3>
           <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>

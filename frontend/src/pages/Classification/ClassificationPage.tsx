@@ -173,8 +173,8 @@ export const ClassificationPage: React.FC<ClassificationPageProps> = ({ datasetI
                   onClick={() => toggleFeature(f.id)}
                   style={{
                     backgroundColor: active ? 'var(--bg-surface-elevated)' : 'var(--bg-primary)',
-                    border: `1px solid ${active ? 'var(--accent-teal)' : 'var(--border-color)'}`,
-                    color: active ? '#F8FAFC' : 'var(--text-muted)',
+                    border: `1px solid ${active ? 'var(--accent-cyan)' : 'var(--border-color)'}`,
+                    color: active ? 'var(--text-main)' : 'var(--text-muted)',
                     borderRadius: 'var(--radius-sm)',
                     padding: '4px 10px',
                     fontSize: '0.78rem',
@@ -217,7 +217,7 @@ export const ClassificationPage: React.FC<ClassificationPageProps> = ({ datasetI
               </div>
               <div>
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Macro F1-Score</span>
-                <div style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--accent-teal)' }}>
+                <div style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--accent-cyan)' }}>
                   {result.macro_f1.toFixed(3)}
                 </div>
               </div>
@@ -229,7 +229,7 @@ export const ClassificationPage: React.FC<ClassificationPageProps> = ({ datasetI
               </div>
               <div>
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Records (Train / Test)</span>
-                <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#F8FAFC' }}>
+                <div style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-main)' }}>
                   {result.total_train_samples} / {result.total_test_samples}
                 </div>
               </div>
@@ -317,7 +317,7 @@ export const ClassificationPage: React.FC<ClassificationPageProps> = ({ datasetI
                         <td>{(metrics.precision * 100).toFixed(1)}%</td>
                         <td>{(metrics.recall * 100).toFixed(1)}%</td>
                         <td>
-                          <strong style={{ color: '#F8FAFC' }}>{metrics.f1_score.toFixed(3)}</strong>
+                          <strong style={{ color: 'var(--text-main)' }}>{metrics.f1_score.toFixed(3)}</strong>
                         </td>
                         <td>{metrics.support}</td>
                       </tr>
@@ -341,14 +341,14 @@ export const ClassificationPage: React.FC<ClassificationPageProps> = ({ datasetI
                 <div style={{ height: '240px' }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={fiData} layout="vertical" margin={{ left: 24, right: 16 }}>
-                      <CartesianGrid stroke="#1C2B40" horizontal={false} />
+                      <CartesianGrid stroke="#E2E8F0" horizontal={false} />
                       <XAxis type="number" stroke="#64748B" />
                       <YAxis dataKey="feature" type="category" stroke="#64748B" width={110} />
                       <Tooltip
-                        contentStyle={{ backgroundColor: '#111C2E', borderColor: '#24344D', borderRadius: '2px', color: '#F8FAFC' }}
+                        contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#CBD5E1', borderRadius: '4px', color: '#0F172A', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.08)' }}
                         formatter={(val: any) => [val, 'Importance']}
                       />
-                      <Bar dataKey="importance" fill="#0D9488" />
+                      <Bar dataKey="importance" fill="#0284C7" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>

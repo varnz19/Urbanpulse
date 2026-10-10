@@ -34,7 +34,7 @@ export const ProvenancePage: React.FC = () => {
               { id: 'HYD-COR-12', name: 'Madhapur - 100ft Road', lat: 17.4485, lon: 78.3908, type: 'Commercial Avenue' },
             ].map((c) => (
               <div key={c.id} style={{ background: 'var(--bg-surface-elevated)', padding: '8px 12px', borderRadius: 'var(--radius-sm)' }}>
-                <div style={{ fontWeight: 600, color: '#F8FAFC', fontSize: '0.82rem' }}>{c.name}</div>
+                <div style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.82rem' }}>{c.name}</div>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '2px' }}>
                   {c.id} • {c.lat.toFixed(4)}, {c.lon.toFixed(4)} ({c.type})
                 </div>

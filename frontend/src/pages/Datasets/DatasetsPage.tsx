@@ -193,7 +193,7 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({ datasetId, onDataset
             <tbody>
               {dataset.columns.map((col) => (
                 <tr key={col.name}>
-                  <td><strong style={{ color: '#F8FAFC' }}>{col.name}</strong></td>
+                  <td><strong style={{ color: 'var(--text-main)' }}>{col.name}</strong></td>
                   <td>
                     <span className="badge badge-neutral" style={{ textTransform: 'capitalize' }}>
                       {col.inferred_type}
@@ -377,8 +377,8 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({ datasetId, onDataset
                   onClick={() => toggleFeature(col.name)}
                   style={{
                     backgroundColor: active ? 'var(--bg-surface-elevated)' : 'var(--bg-primary)',
-                    border: `1px solid ${active ? 'var(--accent-teal)' : 'var(--border-color)'}`,
-                    color: active ? '#F8FAFC' : 'var(--text-muted)',
+                    border: `1px solid ${active ? 'var(--accent-cyan)' : 'var(--border-color)'}`,
+                    color: active ? 'var(--text-main)' : 'var(--text-muted)',
                     borderRadius: 'var(--radius-sm)',
                     padding: '4px 10px',
                     fontSize: '0.78rem',
@@ -400,19 +400,19 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({ datasetId, onDataset
             padding: '14px',
             marginTop: '12px'
           }}>
-            <div style={{ fontWeight: 600, color: '#F8FAFC', marginBottom: '6px' }}>
+            <div style={{ fontWeight: 600, color: 'var(--text-main)', marginBottom: '6px' }}>
               [OK] Transformations Applied
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '10px', marginBottom: '10px' }}>
               <div>
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>Row Delta:</span>
-                <div style={{ fontWeight: 600, color: '#F8FAFC' }}>
+                <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>
                   {preprocResult.original_rows} to {preprocResult.processed_rows}
                 </div>
               </div>
               <div>
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>Feature Columns:</span>
-                <div style={{ fontWeight: 600, color: '#F8FAFC' }}>
+                <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>
                   {preprocResult.original_cols} to {preprocResult.processed_cols}
                 </div>
               </div>

@@ -97,7 +97,7 @@ export const PatternExplorerPage: React.FC<PatternExplorerPageProps> = ({ datase
               padding: '4px 10px',
               borderRadius: 'var(--radius-sm)',
               fontSize: '0.78rem',
-              color: '#F8FAFC',
+              color: 'var(--text-main)',
               border: '1px solid var(--border-color)'
             }}>
               <strong>{hoveredCell.day} at {hoveredCell.hour}:00</strong> : Speed: {hoveredCell.avg_speed} km/h • Volume: {hoveredCell.avg_volume} veh/h
@@ -165,15 +165,15 @@ export const PatternExplorerPage: React.FC<PatternExplorerPageProps> = ({ datase
           <div style={{ height: '240px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={overview?.hourly_trend || []}>
-                <CartesianGrid stroke="#1C2B40" strokeDasharray="2 2" vertical={false} />
+                <CartesianGrid stroke="#E2E8F0" strokeDasharray="2 2" vertical={false} />
                 <XAxis dataKey="hour" stroke="#64748B" tickFormatter={(h) => `${h}:00`} />
                 <YAxis stroke="#64748B" domain={[10, 60]} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#111C2E', borderColor: '#24344D', borderRadius: '2px', color: '#F8FAFC' }}
+                  contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#CBD5E1', borderRadius: '4px', color: '#0F172A', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.08)' }}
                   formatter={(val: any) => [`${val} km/h`, 'Avg Speed']}
                   labelFormatter={(h) => `Time: ${h}:00`}
                 />
-                <Line type="monotone" dataKey="avg_speed" stroke="#0D9488" strokeWidth={2} dot={{ r: 2.5 }} />
+                <Line type="monotone" dataKey="avg_speed" stroke="#0284C7" strokeWidth={2.5} dot={{ r: 3, fill: '#0284C7' }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -188,19 +188,19 @@ export const PatternExplorerPage: React.FC<PatternExplorerPageProps> = ({ datase
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.82rem' }}>
             <div style={{ padding: '10px', background: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-sm)' }}>
-              <strong style={{ color: '#F8FAFC' }}>Morning Peak (08:00 to 11:00):</strong>
+              <strong style={{ color: 'var(--text-main)' }}>Morning Peak (08:00 to 11:00):</strong>
               <p style={{ color: 'var(--text-muted)', marginTop: '2px' }}>
                 Speed reduction observed across tech and arterial sectors (HITEC City and Gachibowli), where speeds decrease 35% to 45% compared to baseline.
               </p>
             </div>
             <div style={{ padding: '10px', background: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-sm)' }}>
-              <strong style={{ color: '#F8FAFC' }}>Evening Peak (17:00 to 21:00):</strong>
+              <strong style={{ color: 'var(--text-main)' }}>Evening Peak (17:00 to 21:00):</strong>
               <p style={{ color: 'var(--text-muted)', marginTop: '2px' }}>
                 Higher volume recorded across arterial transit sectors (Mehdipatnam, Panjagutta, and Dilsukhnagar), with high recurrent congestion.
               </p>
             </div>
             <div style={{ padding: '10px', background: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-sm)' }}>
-              <strong style={{ color: '#F8FAFC' }}>Night Off-Peak (00:00 to 06:00):</strong>
+              <strong style={{ color: 'var(--text-main)' }}>Night Off-Peak (00:00 to 06:00):</strong>
               <p style={{ color: 'var(--text-muted)', marginTop: '2px' }}>
                 Free-flow speeds (&gt; 50 km/h) on Outer Ring Road and Express Corridors with vehicle volume below 1,000 veh/h.
               </p>

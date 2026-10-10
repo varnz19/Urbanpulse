@@ -13,7 +13,7 @@ export const EmptyState: React.FC<{ title: string; message: string; action?: Rea
 }) => {
   return (
     <div className="empty-state">
-      <h3 style={{ color: '#F8FAFC', marginBottom: '6px', fontSize: '1rem' }}>{title}</h3>
+      <h3 style={{ color: 'var(--text-main)', marginBottom: '6px', fontSize: '1rem' }}>{title}</h3>
       <p style={{ maxWidth: '480px', margin: '0 auto 16px auto', fontSize: '0.85rem' }}>{message}</p>
       {action}
     </div>

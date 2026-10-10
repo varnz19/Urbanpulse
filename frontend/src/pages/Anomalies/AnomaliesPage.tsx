@@ -156,7 +156,7 @@ export const AnomaliesPage: React.FC<AnomaliesPageProps> = ({ datasetId }) => {
             <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
               <div>
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Records Evaluated</span>
-                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#F8FAFC' }}>
+                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-main)' }}>
                   {result.total_records.toLocaleString()}
                 </div>
               </div>
@@ -201,11 +201,11 @@ export const AnomaliesPage: React.FC<AnomaliesPageProps> = ({ datasetId }) => {
             <div style={{ height: '220px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <ScatterChart margin={{ top: 10, right: 16, bottom: 16, left: 10 }}>
-                  <CartesianGrid stroke="#1C2B40" strokeDasharray="2 2" />
+                  <CartesianGrid stroke="#E2E8F0" strokeDasharray="2 2" />
                   <XAxis dataKey="index" name="Index" stroke="#64748B" />
                   <YAxis dataKey="anomaly_score" name="Anomaly Score" stroke="#64748B" domain={[0, 1]} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#111C2E', borderColor: '#24344D', borderRadius: '2px', color: '#F8FAFC' }}
+                    contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#CBD5E1', borderRadius: '4px', color: '#0F172A', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.08)' }}
                     formatter={(_val: any, _name: any, entry: any) => {
                       const p = entry.payload;
                       return [
@@ -214,7 +214,7 @@ export const AnomaliesPage: React.FC<AnomaliesPageProps> = ({ datasetId }) => {
                       ];
                     }}
                   />
-                  <Scatter data={result.anomalies} fill="#DC2626" />
+                  <Scatter data={result.anomalies} fill="#E11D48" />
                 </ScatterChart>
               </ResponsiveContainer>
             </div>
@@ -259,7 +259,7 @@ export const AnomaliesPage: React.FC<AnomaliesPageProps> = ({ datasetId }) => {
                     <tr key={anom.index}>
                       <td style={{ color: 'var(--text-dim)', fontSize: '0.75rem' }}>{anom.timestamp}</td>
                       <td>
-                        <strong style={{ color: '#F8FAFC' }}>{anom.segment_name}</strong>
+                        <strong style={{ color: 'var(--text-main)' }}>{anom.segment_name}</strong>
                       </td>
                       <td>
                         <strong style={{ color: anom.observed_value < anom.baseline_value ? '#DC2626' : '#059669' }}>

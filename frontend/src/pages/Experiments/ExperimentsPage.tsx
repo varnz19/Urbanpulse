@@ -78,7 +78,7 @@ export const ExperimentsPage: React.FC<ExperimentsPageProps> = ({ datasetId }) =
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px', flexWrap: 'wrap', gap: '6px' }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <h3 style={{ color: '#F8FAFC', fontSize: '0.98rem', margin: 0 }}>{exp.name}</h3>
+                    <h3 style={{ color: 'var(--text-main)', fontSize: '0.98rem', margin: 0 }}>{exp.name}</h3>
                     <span className="badge badge-mod" style={{ textTransform: 'uppercase' }}>
                       {exp.task_type}
                     </span>

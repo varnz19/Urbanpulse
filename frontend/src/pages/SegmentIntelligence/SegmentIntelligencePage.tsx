@@ -138,8 +138,8 @@ export const SegmentIntelligencePage: React.FC<SegmentIntelligencePageProps> = (
                   onClick={() => toggleFeature(f.id)}
                   style={{
                     backgroundColor: active ? 'var(--bg-surface-elevated)' : 'var(--bg-primary)',
-                    border: `1px solid ${active ? 'var(--accent-teal)' : 'var(--border-color)'}`,
-                    color: active ? '#F8FAFC' : 'var(--text-muted)',
+                    border: `1px solid ${active ? 'var(--accent-cyan)' : 'var(--border-color)'}`,
+                    color: active ? 'var(--text-main)' : 'var(--text-muted)',
                     borderRadius: 'var(--radius-sm)',
                     padding: '4px 10px',
                     fontSize: '0.78rem',
@@ -182,7 +182,7 @@ export const SegmentIntelligencePage: React.FC<SegmentIntelligencePageProps> = (
               </div>
               <div>
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Inertia (WCSS)</span>
-                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#F8FAFC' }}>
+                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-main)' }}>
                   {result.inertia.toLocaleString()}
                 </div>
               </div>
@@ -221,11 +221,11 @@ export const SegmentIntelligencePage: React.FC<SegmentIntelligencePageProps> = (
             <div style={{ height: '340px', width: '100%' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <ScatterChart margin={{ top: 16, right: 16, bottom: 16, left: 16 }}>
-                  <CartesianGrid stroke="#1C2B40" strokeDasharray="2 2" />
+                  <CartesianGrid stroke="#E2E8F0" strokeDasharray="2 2" />
                   <XAxis type="number" dataKey="x" name="PC1" stroke="#64748B" />
                   <YAxis type="number" dataKey="y" name="PC2" stroke="#64748B" />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#111C2E', borderColor: '#24344D', borderRadius: '2px', color: '#F8FAFC' }}
+                    contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#CBD5E1', borderRadius: '4px', color: '#0F172A', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.08)' }}
                     formatter={(_val: any, _name: any, entry: any) => {
                       const p = entry.payload;
                       return [
@@ -252,7 +252,7 @@ export const SegmentIntelligencePage: React.FC<SegmentIntelligencePageProps> = (
                 className="card"
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <strong style={{ fontSize: '0.95rem', color: '#F8FAFC' }}>{prof.cluster_label}</strong>
+                  <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>{prof.cluster_label}</strong>
                   <span className="badge badge-neutral">
                     {prof.member_count} obs ({prof.member_percentage}%)
                   </span>
@@ -269,7 +269,7 @@ export const SegmentIntelligencePage: React.FC<SegmentIntelligencePageProps> = (
                     {Object.entries(prof.feature_means).map(([feat, val]) => (
                       <div key={feat}>
                         <span style={{ color: 'var(--text-dim)' }}>{feat}:</span>
-                        <div style={{ color: '#F8FAFC', fontWeight: 600 }}>{val}</div>
+                        <div style={{ color: 'var(--text-main)', fontWeight: 600 }}>{val}</div>
                       </div>
                     ))}
                   </div>

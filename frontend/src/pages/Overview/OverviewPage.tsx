@@ -135,12 +135,12 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ datasetId }) => {
                   dataKey="value"
                 >
                   {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} stroke="#111C2E" />
+                    <Cell key={`cell-${index}`} fill={entry.color} stroke="#FFFFFF" />
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#111C2E', borderColor: '#24344D', borderRadius: '2px', color: '#F8FAFC' }}
-                  itemStyle={{ color: '#F8FAFC' }}
+                  contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#CBD5E1', borderRadius: '4px', color: '#0F172A', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.08)' }}
+                  itemStyle={{ color: '#0F172A' }}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -148,9 +148,9 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ datasetId }) => {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '6px' }}>
             {pieData.map(item => (
               <div key={item.name} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem' }}>
-                <span style={{ width: '8px', height: '8px', backgroundColor: item.color }} />
+                <span style={{ width: '8px', height: '8px', borderRadius: '2px', backgroundColor: item.color }} />
                 <span style={{ color: 'var(--text-muted)' }}>{item.name}:</span>
-                <strong style={{ color: '#F8FAFC' }}>{item.value}</strong>
+                <strong style={{ color: 'var(--text-main)' }}>{item.value}</strong>
               </div>
             ))}
           </div>
@@ -170,12 +170,12 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ datasetId }) => {
         <div style={{ height: '280px', width: '100%' }}>
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={metrics.hourly_trend}>
-              <CartesianGrid stroke="#1C2B40" strokeDasharray="2 2" vertical={false} />
+              <CartesianGrid stroke="#E2E8F0" strokeDasharray="2 2" vertical={false} />
               <XAxis dataKey="hour" stroke="#64748B" tickFormatter={(h) => `${h}:00`} />
-              <YAxis yAxisId="left" stroke="#0D9488" label={{ value: 'Speed (km/h)', angle: -90, position: 'insideLeft', fill: '#0D9488' }} />
+              <YAxis yAxisId="left" stroke="#0284C7" label={{ value: 'Speed (km/h)', angle: -90, position: 'insideLeft', fill: '#0284C7' }} />
               <YAxis yAxisId="right" orientation="right" stroke="#64748B" label={{ value: 'Volume (veh/h)', angle: 90, position: 'insideRight', fill: '#64748B' }} />
               <Tooltip
-                contentStyle={{ backgroundColor: '#111C2E', borderColor: '#24344D', borderRadius: '2px', color: '#F8FAFC' }}
+                contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#CBD5E1', borderRadius: '4px', color: '#0F172A', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.08)' }}
                 formatter={(val: any, name: any) => [val, name === 'avg_speed' ? 'Speed (km/h)' : 'Volume (veh/h)']}
                 labelFormatter={(h) => `Time: ${h}:00`}
               />
@@ -208,7 +208,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ datasetId }) => {
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <strong style={{ color: '#F8FAFC', fontSize: '0.88rem' }}>{d.day_type}</strong>
+                  <strong style={{ color: 'var(--text-main)', fontSize: '0.88rem' }}>{d.day_type}</strong>
                   <span className={`badge ${d.severe_congestion_pct > 20 ? 'badge-high' : 'badge-low'}`}>
                     {d.severe_congestion_pct}% Severe/High
                   </span>
@@ -216,11 +216,11 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ datasetId }) => {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '0.8rem' }}>
                   <div>
                     <span style={{ color: 'var(--text-dim)' }}>Mean Speed:</span>
-                    <div style={{ color: '#F8FAFC', fontWeight: 600 }}>{d.avg_speed} km/h</div>
+                    <div style={{ color: 'var(--text-main)', fontWeight: 600 }}>{d.avg_speed} km/h</div>
                   </div>
                   <div>
                     <span style={{ color: 'var(--text-dim)' }}>Avg Volume:</span>
-                    <div style={{ color: '#F8FAFC', fontWeight: 600 }}>{d.avg_volume.toLocaleString()} veh/h</div>
+                    <div style={{ color: 'var(--text-main)', fontWeight: 600 }}>{d.avg_volume.toLocaleString()} veh/h</div>
                   </div>
                 </div>
               </div>
@@ -254,7 +254,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ datasetId }) => {
                 {metrics.top_priority_corridors.map((p) => (
                   <tr key={p.segment_id}>
                     <td>
-                      <div style={{ fontWeight: 600, color: '#F8FAFC' }}>{p.segment_name}</div>
+                      <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{p.segment_name}</div>
                       <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{p.segment_id}</div>
                     </td>
                     <td>
