@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { LoadingSkeleton, ErrorAlert } from '../../components/common/Feedback';
-import { runClassification, saveExperiment } from '../../services/api';
+import { runClassification, saveExperiment, fetchDataset } from '../../services/api';
 import { ClassifyResponse } from '../../types';
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid
@@ -13,7 +13,8 @@ interface ClassificationPageProps {
 
 export const ClassificationPage: React.FC<ClassificationPageProps> = ({ datasetId }) => {
   const [modelType, setModelType] = useState<string>('decision_tree');
-  const [targetCol] = useState<string>('congestion_level');
+  const [targetCol, setTargetCol] = useState<string>('congestion_level');
+  const [allCols, setAllCols] = useState<string[]>([]);
   const [featureCols, setFeatureCols] = useState<string[]>(['avg_speed_kmh', 'vehicle_count', 'hour', 'weather', 'road_type']);
   const [maxDepth, setMaxDepth] = useState<number>(4);
   const [testSize, setTestSize] = useState<number>(0.2);
@@ -22,14 +23,31 @@ export const ClassificationPage: React.FC<ClassificationPageProps> = ({ datasetI
   const [error, setError] = useState<string | null>(null);
   const [savedSuccess, setSavedSuccess] = useState<boolean>(false);
 
-  const availableFeatures = [
-    { id: 'avg_speed_kmh', label: 'Average Speed' },
-    { id: 'vehicle_count', label: 'Vehicle Volume' },
-    { id: 'hour', label: 'Hour of Day' },
-    { id: 'weather', label: 'Weather Condition' },
-    { id: 'road_type', label: 'Road Segment Type' },
-    { id: 'is_weekend', label: 'Weekend Indicator' },
-  ];
+  useEffect(() => {
+    if (!datasetId) return;
+    fetchDataset(datasetId)
+      .then((ds) => {
+        const colNames = ds.columns.map(c => c.name);
+        setAllCols(colNames);
+
+        // Pick best target column
+        let chosenTarget = colNames.find(c => ['congestion_level', 'congestion', 'status', 'label', 'target'].includes(c.toLowerCase()));
+        if (!chosenTarget && colNames.length > 0) {
+          // Choose the last column as target default
+          chosenTarget = colNames[colNames.length - 1];
+        }
+        if (chosenTarget) {
+          setTargetCol(chosenTarget);
+          const remaining = colNames.filter(c => c !== chosenTarget && c !== 'Unnamed: 0');
+          setFeatureCols(remaining.slice(0, 5));
+        }
+      })
+      .catch(console.error);
+  }, [datasetId]);
+
+  const availableFeatures = allCols
+    .filter(c => c !== targetCol && c !== 'Unnamed: 0')
+    .map(c => ({ id: c, label: c }));
 
   const handleRunModel = async () => {
     if (!datasetId) return;
@@ -124,13 +142,19 @@ export const ClassificationPage: React.FC<ClassificationPageProps> = ({ datasetI
 
           <div className="form-group">
             <label className="form-label">Target Attribute</label>
-            <input
-              type="text"
-              className="form-input"
+            <select
+              className="form-select"
               value={targetCol}
-              disabled
-              style={{ opacity: 0.8 }}
-            />
+              onChange={(e) => {
+                const newT = e.target.value;
+                setTargetCol(newT);
+                setFeatureCols(prev => prev.filter(c => c !== newT));
+              }}
+            >
+              {allCols.filter(c => c !== 'Unnamed: 0').map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
           </div>
 
           <div className="form-group">

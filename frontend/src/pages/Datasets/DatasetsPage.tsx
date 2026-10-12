@@ -1,15 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { LoadingSkeleton, ErrorAlert } from '../../components/common/Feedback';
-import { fetchDataset, fetchDatasetPreview, uploadDataset, preprocessDataset } from '../../services/api';
+import { fetchDataset, fetchDatasetPreview, uploadDataset, preprocessDataset, deleteDataset } from '../../services/api';
 import { Dataset, DatasetPreview, PreprocessResult } from '../../types';
 
 interface DatasetsPageProps {
   datasetId: string;
-  onDatasetUploaded: () => void;
+  datasets?: Dataset[];
+  onSelectDataset?: (id: string) => void;
+  onDatasetUploaded: (newId?: string) => void;
 }
 
-export const DatasetsPage: React.FC<DatasetsPageProps> = ({ datasetId, onDatasetUploaded }) => {
+export const DatasetsPage: React.FC<DatasetsPageProps> = ({
+  datasetId,
+  datasets = [],
+  onSelectDataset,
+  onDatasetUploaded
+}) => {
   const [dataset, setDataset] = useState<Dataset | null>(null);
   const [preview, setPreview] = useState<DatasetPreview | null>(null);
   const [page, setPage] = useState<number>(1);
@@ -71,12 +78,28 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({ datasetId, onDataset
 
     try {
       const res = await uploadDataset(file);
-      setUploadSuccess(`Ingested ${res.name} (${res.row_count} rows, ${res.column_count} columns)`);
-      onDatasetUploaded();
+      setUploadSuccess(`Successfully ingested "${res.name}" (${res.row_count} rows, ${res.column_count} columns) and activated as current corpus!`);
+      onDatasetUploaded(res.id);
     } catch (err: any) {
       setUploadError(err.message || 'Failed to upload dataset');
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleDeleteDataset = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!window.confirm("Are you sure you want to delete this uploaded dataset?")) return;
+    try {
+      await deleteDataset(id);
+      // If we deleted the active dataset, fallback to demo
+      if (id === datasetId) {
+        const demo = datasets.find(d => d.is_demo);
+        if (demo && onSelectDataset) onSelectDataset(demo.id);
+      }
+      onDatasetUploaded();
+    } catch (err: any) {
+      alert(`Delete failed: ${err.message}`);
     }
   };
 
@@ -115,54 +138,180 @@ export const DatasetsPage: React.FC<DatasetsPageProps> = ({ datasetId, onDataset
     <div>
       <PageHeader
         title="Dataset Workspace & Feature Preparation"
-        description="Inspect schema metadata, profile column distributions, view observation records, and configure reproducible data cleaning."
+        description="Choose between the built-in Hyderabad Benchmark or your own uploaded datasets to view platform results."
       />
 
-      {/* Upload & Ingestion Strip */}
-      <div className="card" style={{ marginBottom: '20px' }}>
-        <div className="card-header">
+      {/* Side-by-Side Choice: Sample Benchmark vs Uploaded Custom Data */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '20px', marginBottom: '24px' }}>
+        
+        {/* Option 1: Sample Benchmark Dataset */}
+        <div className="card" style={{
+          border: dataset.is_demo ? '2px solid var(--accent-teal)' : '1px solid var(--border-color)',
+          boxShadow: dataset.is_demo ? '0 0 16px rgba(13, 148, 136, 0.15)' : 'none',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between'
+        }}>
           <div>
-            <div className="card-title">Ingest Traffic Corpus</div>
-            <div className="card-subtitle">
-              Upload local CSV or ARFF files with timestamps, velocities, volume, or spatial coordinates
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
+              <div>
+                <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>🏢</span> Option 1: Sample Benchmark Dataset
+                </div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  Hyderabad Arterial Corridors (Empirical Benchmark)
+                </div>
+              </div>
+              {dataset.is_demo && (
+                <span className="badge badge-accent" style={{ backgroundColor: '#0D9488', color: '#FFF' }}>
+                  ✓ ACTIVE NOW
+                </span>
+              )}
+            </div>
+
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-dim)', lineHeight: 1.5, margin: '10px 0 16px 0' }}>
+              Pre-loaded authentic benchmark containing <strong>2,016 hourly records</strong> across <strong>12 verified road corridors</strong> (HITEC City, Gachibowli ORR, Banjara Hills, Jubilee Hills, etc.) with real speeds, vehicle volumes, weather conditions, and congestion states.
+            </p>
+
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {datasets.filter(d => d.is_demo).map((d) => (
+                <button
+                  key={d.id}
+                  type="button"
+                  onClick={() => onSelectDataset?.(d.id)}
+                  className={`btn ${datasetId === d.id ? 'btn-primary' : 'btn-secondary'}`}
+                  style={{ fontSize: '0.8rem', padding: '6px 12px' }}
+                >
+                  {datasetId === d.id ? '✓ Using ' : 'Switch to '} {d.file_format.toUpperCase()}
+                </button>
+              ))}
             </div>
           </div>
+
+          <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px solid var(--border-color)', fontSize: '0.75rem', color: 'var(--text-dim)' }}>
+            Includes full GPS coordinates for maps, diurnal recurrence, and classification ground truth.
+          </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
-          <label className="btn btn-primary" style={{ cursor: 'pointer' }}>
-            <span>{uploading ? 'Processing File...' : 'Upload File (.csv or .arff)'}</span>
-            <input
-              type="file"
-              accept=".csv,.arff"
-              onChange={handleFileUpload}
-              disabled={uploading}
-              style={{ display: 'none' }}
-            />
-          </label>
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>
-            Max file limit 50MB. Automatic schema verification and column inference applied.
-          </span>
-        </div>
+        {/* Option 2: Uploaded Custom Dataset */}
+        <div className="card" style={{
+          border: !dataset.is_demo ? '2px solid var(--accent-cyan)' : '1px solid var(--border-color)',
+          boxShadow: !dataset.is_demo ? '0 0 16px rgba(2, 132, 199, 0.15)' : 'none',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between'
+        }}>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
+              <div>
+                <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>📁</span> Option 2: Upload Your Own Dataset
+                </div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  Ingest CSV or ARFF files (Kaggle, NYC DOT, traffic sensors)
+                </div>
+              </div>
+              {!dataset.is_demo && (
+                <span className="badge badge-accent" style={{ backgroundColor: '#0284C7', color: '#FFF' }}>
+                  ✓ ACTIVE NOW
+                </span>
+              )}
+            </div>
 
-        {uploadError && (
-          <div style={{ marginTop: '12px' }}>
-            <ErrorAlert message={uploadError} />
+            <div style={{ margin: '14px 0' }}>
+              <label className="btn btn-primary" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <span>⬆ {uploading ? 'Parsing File...' : 'Upload File (.csv or .arff)'}</span>
+                <input
+                  type="file"
+                  accept=".csv,.arff"
+                  onChange={handleFileUpload}
+                  disabled={uploading}
+                  style={{ display: 'none' }}
+                />
+              </label>
+              <span style={{ fontSize: '0.76rem', color: 'var(--text-dim)', marginLeft: '12px' }}>
+                Max 50MB. Auto-parses timestamps, speeds, volume, or labels.
+              </span>
+            </div>
+
+            {uploadError && <div style={{ marginTop: '10px' }}><ErrorAlert message={uploadError} /></div>}
+            {uploadSuccess && (
+              <div style={{
+                marginTop: '10px',
+                backgroundColor: 'rgba(5, 150, 105, 0.15)',
+                border: '1px solid #059669',
+                borderRadius: 'var(--radius-sm)',
+                padding: '8px 12px',
+                color: '#10B981',
+                fontSize: '0.82rem'
+              }}>
+                [OK] {uploadSuccess}
+              </div>
+            )}
+
+            {/* List of previously uploaded custom datasets */}
+            {datasets.filter(d => !d.is_demo).length > 0 && (
+              <div style={{ marginTop: '16px' }}>
+                <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>
+                  Your Uploaded Datasets ({datasets.filter(d => !d.is_demo).length}):
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '160px', overflowY: 'auto' }}>
+                  {datasets.filter(d => !d.is_demo).map((d) => {
+                    const isActive = d.id === datasetId;
+                    return (
+                      <div
+                        key={d.id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '6px 10px',
+                          borderRadius: 'var(--radius-sm)',
+                          backgroundColor: isActive ? 'var(--bg-surface-elevated)' : 'var(--bg-primary)',
+                          border: `1px solid ${isActive ? 'var(--accent-cyan)' : 'var(--border-color)'}`
+                        }}
+                      >
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                            {d.name} {isActive && <span style={{ color: 'var(--accent-cyan)', fontSize: '0.72rem' }}>✓ Active</span>}
+                          </span>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>
+                            {d.row_count.toLocaleString()} rows • {d.column_count} cols
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          {!isActive && (
+                            <button
+                              type="button"
+                              onClick={() => onSelectDataset?.(d.id)}
+                              className="btn btn-secondary"
+                              style={{ padding: '3px 8px', fontSize: '0.74rem' }}
+                            >
+                              Activate
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={(e) => handleDeleteDataset(d.id, e)}
+                            className="btn btn-secondary"
+                            style={{ padding: '3px 8px', fontSize: '0.74rem', color: '#EF4444' }}
+                            title="Delete this uploaded dataset"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
-        )}
-        {uploadSuccess && (
-          <div style={{
-            marginTop: '12px',
-            backgroundColor: 'rgba(5, 150, 105, 0.15)',
-            border: '1px solid #059669',
-            borderRadius: 'var(--radius-sm)',
-            padding: '8px 12px',
-            color: '#10B981',
-            fontSize: '0.82rem'
-          }}>
-            [OK] {uploadSuccess}
+
+          <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px solid var(--border-color)', fontSize: '0.75rem', color: 'var(--text-dim)' }}>
+            Switching datasets dynamically refreshes results across all analytics and ML pages.
           </div>
-        )}
+        </div>
       </div>
 
       {/* Column Profile Table */}

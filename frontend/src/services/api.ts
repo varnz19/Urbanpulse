@@ -5,7 +5,8 @@ import {
   AnomalyResponse, ExperimentItem
 } from '../types';
 
-const API_BASE = '/api';
+const rawBase = (import.meta.env.VITE_API_BASE_URL as string) || '/api';
+export const API_BASE = rawBase.endsWith('/') ? rawBase.slice(0, -1) : rawBase;
 
 export async function fetchDatasets(): Promise<Dataset[]> {
   const res = await fetch(`${API_BASE}/datasets`);
@@ -32,6 +33,17 @@ export async function uploadDataset(file: File): Promise<Dataset> {
   }
   return res.json();
 }
+
+export async function deleteDataset(id: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/datasets/${id}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Failed to delete dataset' }));
+    throw new Error(err.detail || 'Failed to delete dataset');
+  }
+}
+
 
 export async function fetchDatasetPreview(id: string, page = 1, pageSize = 25): Promise<DatasetPreview> {
   const res = await fetch(`${API_BASE}/datasets/${id}/preview?page=${page}&page_size=${pageSize}`);

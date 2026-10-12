@@ -161,3 +161,17 @@ def save_uploaded_file(db: Session, filename: str, content: bytes) -> DatasetMod
     db.commit()
     db.refresh(model)
     return model
+
+def delete_dataset(db: Session, dataset_id: str) -> bool:
+    ds = db.query(DatasetModel).filter(DatasetModel.id == dataset_id).first()
+    if not ds or ds.is_demo:
+        return False
+    if ds.file_path and os.path.exists(ds.file_path):
+        try:
+            os.remove(ds.file_path)
+        except Exception:
+            pass
+    db.delete(ds)
+    db.commit()
+    return True
+

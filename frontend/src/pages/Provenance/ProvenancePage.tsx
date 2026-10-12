@@ -1,6 +1,5 @@
 import React from 'react';
 import { PageHeader } from '../../components/layout/PageHeader';
-import { NavLink } from 'react-router-dom';
 
 export const ProvenancePage: React.FC = () => {
   return (
@@ -104,22 +103,8 @@ export const ProvenancePage: React.FC = () => {
             </table>
           </div>
         </div>
-
-        <div className="card">
-          <div className="card-header">
-            <div className="card-title">Privacy & Legal Policies</div>
-          </div>
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-            <p style={{ marginBottom: '8px' }}>
-              UrbanPulse processes only aggregated macroscopic traffic sensor speeds and vehicle counts. No personally identifiable information (PII) or GPS tracks are collected.
-            </p>
-            <div style={{ display: 'flex', gap: '14px', marginTop: '10px' }}>
-              <NavLink to="/terms" className="btn btn-secondary" style={{ fontSize: '0.78rem' }}>View Terms of Service</NavLink>
-              <NavLink to="/privacy" className="btn btn-secondary" style={{ fontSize: '0.78rem' }}>View Privacy Policy</NavLink>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
 };
+

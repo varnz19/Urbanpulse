@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { LoadingSkeleton, ErrorAlert } from '../../components/common/Feedback';
-import { runClustering, saveExperiment } from '../../services/api';
+import { runClustering, saveExperiment, fetchDataset } from '../../services/api';
 import { ClusterResponse } from '../../types';
 import {
   ResponsiveContainer, ScatterChart, Scatter, XAxis, YAxis, Tooltip, CartesianGrid, Cell
@@ -14,18 +14,36 @@ interface SegmentIntelligencePageProps {
 export const SegmentIntelligencePage: React.FC<SegmentIntelligencePageProps> = ({ datasetId }) => {
   const [k, setK] = useState<number>(3);
   const [features, setFeatures] = useState<string[]>(['avg_speed_kmh', 'vehicle_count']);
+  const [availableFeatures, setAvailableFeatures] = useState<{ id: string; label: string }[]>([
+    { id: 'avg_speed_kmh', label: 'Average Speed (km/h)' },
+    { id: 'vehicle_count', label: 'Vehicle Count (Volume)' },
+    { id: 'hour', label: 'Hour of Day' },
+    { id: 'is_weekend', label: 'Weekend Indicator' },
+  ]);
   const [scaleFeatures, setScaleFeatures] = useState<boolean>(true);
   const [result, setResult] = useState<ClusterResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [savedSuccess, setSavedSuccess] = useState<boolean>(false);
 
-  const availableFeatures = [
-    { id: 'avg_speed_kmh', label: 'Average Speed (km/h)' },
-    { id: 'vehicle_count', label: 'Vehicle Count (Volume)' },
-    { id: 'hour', label: 'Hour of Day' },
-    { id: 'is_weekend', label: 'Weekend Indicator' },
-  ];
+  useEffect(() => {
+    if (!datasetId) return;
+    fetchDataset(datasetId)
+      .then((ds) => {
+        const numCols = ds.columns.filter(c => c.inferred_type === 'numeric' || c.inferred_type === 'integer' || c.inferred_type === 'float');
+        if (numCols.length > 0) {
+          const mapped = numCols.map(c => ({ id: c.name, label: c.name }));
+          setAvailableFeatures(mapped);
+          const defaultSelected = mapped.filter(m => ['avg_speed_kmh', 'vehicle_count', 'speed', 'volume', 'value'].includes(m.id.toLowerCase()));
+          if (defaultSelected.length > 0) {
+            setFeatures(defaultSelected.map(m => m.id));
+          } else {
+            setFeatures(mapped.slice(0, Math.min(3, mapped.length)).map(m => m.id));
+          }
+        }
+      })
+      .catch(console.error);
+  }, [datasetId]);
 
   const handleRunClustering = async () => {
     if (!datasetId) return;

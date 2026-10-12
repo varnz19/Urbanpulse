@@ -75,6 +75,13 @@ async def upload_dataset(file: UploadFile = File(...), db: Session = Depends(get
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to parse dataset: {str(e)}")
 
+@router.delete("/{dataset_id}")
+def delete_dataset(dataset_id: str, db: Session = Depends(get_db)):
+    success = dataset_service.delete_dataset(db, dataset_id)
+    if not success:
+        raise HTTPException(status_code=400, detail="Cannot delete this dataset (may be a built-in benchmark dataset or not found).")
+    return {"status": "success", "message": f"Dataset {dataset_id} deleted."}
+
 @router.get("/{dataset_id}/preview", response_model=DatasetPreviewResponse)
 def get_dataset_preview(
     dataset_id: str,

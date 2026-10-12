@@ -6,82 +6,125 @@ from app.schemas.analytics_schemas import (
     PrioritySegmentItem, HeatmapResponse, HeatmapCell, CorridorGeoItem
 )
 
+def _find_column(df: pd.DataFrame, candidates: List[str]) -> Optional[str]:
+    cols_lower = {str(c).lower(): c for c in df.columns}
+    for cand in candidates:
+        if cand.lower() in cols_lower:
+            return cols_lower[cand.lower()]
+    return None
+
 def compute_overview_metrics(df: pd.DataFrame) -> OverviewMetrics:
     total_obs = len(df)
     unique_segs = int(df["segment_id"].nunique()) if "segment_id" in df.columns else (
         int(df["segment_name"].nunique()) if "segment_name" in df.columns else 1
     )
 
-    # Date coverage
+    # Date coverage and temporal derivations
     date_start, date_end = None, None
-    if "timestamp" in df.columns:
-        valid_ts = pd.to_datetime(df["timestamp"], errors="coerce").dropna()
-        if not valid_ts.empty:
-            date_start = valid_ts.min().strftime("%Y-%m-%d %H:%M")
-            date_end = valid_ts.max().strftime("%Y-%m-%d %H:%M")
+    work_df = df.copy()
+
+    ts_col = _find_column(work_df, ["timestamp", "datetime", "date_time", "date"])
+    if ts_col:
+        valid_ts = pd.to_datetime(work_df[ts_col], errors="coerce")
+        non_null_ts = valid_ts.dropna()
+        if not non_null_ts.empty:
+            date_start = non_null_ts.min().strftime("%Y-%m-%d %H:%M")
+            date_end = non_null_ts.max().strftime("%Y-%m-%d %H:%M")
+        if "hour" not in work_df.columns:
+            work_df["hour"] = valid_ts.dt.hour
+        if "day_of_week" not in work_df.columns:
+            work_df["day_of_week"] = valid_ts.dt.day_name()
 
     # Completeness %
     total_cells = df.size
     missing_cells = df.isna().sum().sum()
     completeness = round(((total_cells - missing_cells) / max(1, total_cells)) * 100, 1)
 
-    # Speed & Volume
-    avg_speed = float(round(df["avg_speed_kmh"].mean(), 1)) if "avg_speed_kmh" in df.columns else None
-    avg_volume = float(round(df["vehicle_count"].mean(), 0)) if "vehicle_count" in df.columns else None
+    # Speed & Volume column detection
+    speed_col = _find_column(work_df, ["avg_speed_kmh", "speed", "velocity", "avg_speed", "spd"])
+    vol_col = _find_column(work_df, ["vehicle_count", "volume", "traffic_volume", "count", "value", "total_volume"])
+
+    avg_speed = float(round(work_df[speed_col].mean(), 1)) if speed_col and pd.api.types.is_numeric_dtype(work_df[speed_col]) else None
+    avg_volume = float(round(work_df[vol_col].mean(), 0)) if vol_col and pd.api.types.is_numeric_dtype(work_df[vol_col]) else None
 
     # Congestion breakdown
     congestion_breakdown = {}
-    if "congestion_level" in df.columns:
-        counts = df["congestion_level"].value_counts().to_dict()
+    cong_col = _find_column(work_df, ["congestion_level", "congestion", "traffic_state", "status"])
+    if cong_col:
+        counts = work_df[cong_col].value_counts().to_dict()
         for k, v in counts.items():
             congestion_breakdown[str(k)] = int(v)
-    elif "avg_speed_kmh" in df.columns:
-        # Derive if column absent
+    elif speed_col and pd.api.types.is_numeric_dtype(work_df[speed_col]):
         def speed_to_cong(s):
             if pd.isna(s): return "Unknown"
             if s < 18: return "Severe"
             if s < 28: return "High"
             if s < 40: return "Moderate"
             return "Low"
-        counts = df["avg_speed_kmh"].apply(speed_to_cong).value_counts().to_dict()
+        counts = work_df[speed_col].apply(speed_to_cong).value_counts().to_dict()
         for k, v in counts.items():
             congestion_breakdown[str(k)] = int(v)
+    elif vol_col and pd.api.types.is_numeric_dtype(work_df[vol_col]):
+        # Partition volume into quantiles if no speed exists
+        s = work_df[vol_col].dropna()
+        if not s.empty:
+            q25, q50, q75 = s.quantile(0.25), s.quantile(0.50), s.quantile(0.75)
+            def vol_to_cong(v):
+                if pd.isna(v): return "Unknown"
+                if v >= q75: return "Severe"
+                if v >= q50: return "High"
+                if v >= q25: return "Moderate"
+                return "Low"
+            counts = s.apply(vol_to_cong).value_counts().to_dict()
+            for k, v in counts.items():
+                congestion_breakdown[str(k)] = int(v)
 
     # Hourly trend
     hourly_trend = []
-    if "hour" in df.columns and "avg_speed_kmh" in df.columns:
-        grouped = df.groupby("hour").agg({
-            "avg_speed_kmh": "mean",
-            "vehicle_count": "mean" if "vehicle_count" in df.columns else "count"
-        }).reset_index()
-        for _, row in grouped.iterrows():
-            h = int(row["hour"])
-            spd = float(round(row["avg_speed_kmh"], 1))
-            vol = float(round(row["vehicle_count"], 0)) if "vehicle_count" in df.columns else 0.0
-            # Higher index = more congested (inversely related to speed)
-            cong_idx = float(round(max(0, 60.0 - spd), 1))
-            hourly_trend.append(HourlyTrendItem(
-                hour=h,
-                avg_speed=spd,
-                avg_volume=vol,
-                congestion_index=cong_idx
-            ))
+    if "hour" in work_df.columns:
+        valid_hour_df = work_df.dropna(subset=["hour"])
+        if not valid_hour_df.empty:
+            agg_spec = {}
+            if speed_col and pd.api.types.is_numeric_dtype(valid_hour_df[speed_col]):
+                agg_spec[speed_col] = "mean"
+            if vol_col and pd.api.types.is_numeric_dtype(valid_hour_df[vol_col]):
+                agg_spec[vol_col] = "mean"
+
+            if agg_spec:
+                grouped = valid_hour_df.groupby("hour").agg(agg_spec).reset_index()
+            else:
+                grouped = valid_hour_df.groupby("hour").size().reset_index(name="_count_")
+
+            for _, row in grouped.iterrows():
+                try:
+                    h = int(row["hour"])
+                except Exception:
+                    continue
+                spd = float(round(row[speed_col], 1)) if speed_col and speed_col in row and pd.notna(row[speed_col]) else 35.0
+                vol = float(round(row[vol_col], 0)) if vol_col and vol_col in row and pd.notna(row[vol_col]) else 0.0
+                cong_idx = float(round(max(0, 60.0 - spd), 1))
+                hourly_trend.append(HourlyTrendItem(
+                    hour=h,
+                    avg_speed=spd,
+                    avg_volume=vol,
+                    congestion_index=cong_idx
+                ))
+            hourly_trend.sort(key=lambda x: x.hour)
 
     # Weekday vs Weekend
     day_comparison = []
-    if "is_weekend" in df.columns or "day_of_week" in df.columns:
-        temp_df = df.copy()
-        if "is_weekend" not in temp_df.columns:
-            temp_df["is_weekend"] = temp_df["day_of_week"].apply(lambda d: 1 if str(d).lower() in ("saturday", "sunday") else 0)
+    if "is_weekend" not in work_df.columns and "day_of_week" in work_df.columns:
+        work_df["is_weekend"] = work_df["day_of_week"].apply(lambda d: 1 if str(d).lower() in ("saturday", "sunday") else 0)
 
+    if "is_weekend" in work_df.columns:
         for w_val, label in [(0, "Weekday"), (1, "Weekend")]:
-            sub = temp_df[temp_df["is_weekend"] == w_val]
+            sub = work_df[work_df["is_weekend"] == w_val]
             if not sub.empty:
-                spd = float(round(sub["avg_speed_kmh"].mean(), 1)) if "avg_speed_kmh" in sub.columns else 0.0
-                vol = float(round(sub["vehicle_count"].mean(), 0)) if "vehicle_count" in sub.columns else 0.0
+                spd = float(round(sub[speed_col].mean(), 1)) if speed_col and speed_col in sub.columns and pd.api.types.is_numeric_dtype(sub[speed_col]) else 35.0
+                vol = float(round(sub[vol_col].mean(), 0)) if vol_col and vol_col in sub.columns and pd.api.types.is_numeric_dtype(sub[vol_col]) else 0.0
                 sev_pct = 0.0
-                if "congestion_level" in sub.columns:
-                    sev_count = (sub["congestion_level"].isin(["High", "Severe"])).sum()
+                if cong_col and cong_col in sub.columns:
+                    sev_count = (sub[cong_col].isin(["High", "Severe"])).sum()
                     sev_pct = round((sev_count / len(sub)) * 100, 1)
                 day_comparison.append(DayComparisonItem(
                     day_type=label,
@@ -92,24 +135,23 @@ def compute_overview_metrics(df: pd.DataFrame) -> OverviewMetrics:
 
     # Top priority corridors
     priority_corridors = []
-    if "segment_name" in df.columns or "segment_id" in df.columns:
-        seg_col = "segment_name" if "segment_name" in df.columns else "segment_id"
-        seg_groups = df.groupby(seg_col)
+    seg_col = _find_column(work_df, ["segment_name", "segment_id", "street", "corridor", "roadway"])
+    if seg_col:
+        seg_groups = work_df.groupby(seg_col)
         for name, grp in seg_groups:
-            spd = float(round(grp["avg_speed_kmh"].mean(), 1)) if "avg_speed_kmh" in grp.columns else 0.0
-            vol = float(round(grp["vehicle_count"].mean(), 0)) if "vehicle_count" in grp.columns else 0.0
+            spd = float(round(grp[speed_col].mean(), 1)) if speed_col and speed_col in grp.columns and pd.api.types.is_numeric_dtype(grp[speed_col]) else 35.0
+            vol = float(round(grp[vol_col].mean(), 0)) if vol_col and vol_col in grp.columns and pd.api.types.is_numeric_dtype(grp[vol_col]) else 0.0
             lat = float(grp["latitude"].iloc[0]) if "latitude" in grp.columns and pd.notna(grp["latitude"].iloc[0]) else None
             lon = float(grp["longitude"].iloc[0]) if "longitude" in grp.columns and pd.notna(grp["longitude"].iloc[0]) else None
             seg_id = str(grp["segment_id"].iloc[0]) if "segment_id" in grp.columns else str(name)
 
             cong_rate = 0.0
             dom_cong = "Moderate"
-            if "congestion_level" in grp.columns:
-                cong_count = grp["congestion_level"].isin(["High", "Severe"]).sum()
+            if cong_col and cong_col in grp.columns:
+                cong_count = grp[cong_col].isin(["High", "Severe"]).sum()
                 cong_rate = round((cong_count / len(grp)) * 100, 1)
-                dom_cong = str(grp["congestion_level"].mode().iloc[0]) if not grp["congestion_level"].mode().empty else "Moderate"
+                dom_cong = str(grp[cong_col].mode().iloc[0]) if not grp[cong_col].mode().empty else "Moderate"
 
-            # Risk score composite: 60% severe rate + 40% speed deficit
             speed_deficit = max(0, 50.0 - spd)
             risk = round((cong_rate * 0.6) + (speed_deficit * 0.8), 1)
 
@@ -146,25 +188,38 @@ def compute_heatmap(df: pd.DataFrame, metric: str = "avg_speed_kmh") -> HeatmapR
     day_abbrev = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
     cells = []
 
-    # Ensure hour & day_of_week
     work_df = df.copy()
-    if "hour" not in work_df.columns and "timestamp" in work_df.columns:
-        ts = pd.to_datetime(work_df["timestamp"], errors="coerce")
+    ts_col = _find_column(work_df, ["timestamp", "datetime", "date_time", "date"])
+    if "hour" not in work_df.columns and ts_col:
+        ts = pd.to_datetime(work_df[ts_col], errors="coerce")
         work_df["hour"] = ts.dt.hour
         work_df["day_of_week"] = ts.dt.day_name()
 
+    speed_col = _find_column(work_df, ["avg_speed_kmh", "speed", "velocity", "avg_speed", "spd"])
+    vol_col = _find_column(work_df, ["vehicle_count", "volume", "traffic_volume", "count", "value", "total_volume"])
+
     if "hour" in work_df.columns and "day_of_week" in work_df.columns:
-        grouped = work_df.groupby(["day_of_week", "hour"]).agg({
-            "avg_speed_kmh": "mean" if "avg_speed_kmh" in work_df.columns else "count",
-            "vehicle_count": "mean" if "vehicle_count" in work_df.columns else "count"
-        }).reset_index()
+        valid_df = work_df.dropna(subset=["hour", "day_of_week"]).copy()
+        agg_spec = {}
+        if speed_col and pd.api.types.is_numeric_dtype(valid_df[speed_col]):
+            agg_spec[speed_col] = "mean"
+        if vol_col and pd.api.types.is_numeric_dtype(valid_df[vol_col]):
+            agg_spec[vol_col] = "mean"
+
+        if agg_spec:
+            grouped = valid_df.groupby(["day_of_week", "hour"]).agg(agg_spec).reset_index()
+        else:
+            grouped = valid_df.groupby(["day_of_week", "hour"]).size().reset_index(name="_count_")
 
         grouped_dict = {}
         for _, row in grouped.iterrows():
             d_name = str(row["day_of_week"]).capitalize()
-            h = int(row["hour"])
-            spd = float(round(row["avg_speed_kmh"], 1)) if "avg_speed_kmh" in work_df.columns else 35.0
-            vol = float(round(row["vehicle_count"], 0)) if "vehicle_count" in work_df.columns else 2500.0
+            try:
+                h = int(row["hour"])
+            except Exception:
+                continue
+            spd = float(round(row[speed_col], 1)) if speed_col and speed_col in row and pd.notna(row[speed_col]) else 35.0
+            vol = float(round(row[vol_col], 0)) if vol_col and vol_col in row and pd.notna(row[vol_col]) else 2500.0
             cong = float(round(max(0, 60.0 - spd), 1))
             grouped_dict[(d_name, h)] = (spd, vol, cong)
 
@@ -173,7 +228,6 @@ def compute_heatmap(df: pd.DataFrame, metric: str = "avg_speed_kmh") -> HeatmapR
                 if (d_full, h) in grouped_dict:
                     spd, vol, cong = grouped_dict[(d_full, h)]
                 else:
-                    # Interpolate from adjacent hour if data exists in 2-hour increments
                     prev_h = (h - 1) % 24
                     next_h = (h + 1) % 24
                     if (d_full, prev_h) in grouped_dict:

@@ -12,8 +12,6 @@ import { AnomaliesPage } from './pages/Anomalies/AnomaliesPage';
 import { ExperimentsPage } from './pages/Experiments/ExperimentsPage';
 import { ReportsPage } from './pages/Reports/ReportsPage';
 import { ProvenancePage } from './pages/Provenance/ProvenancePage';
-import { TermsPage } from './pages/Terms/TermsPage';
-import { PrivacyPage } from './pages/Privacy/PrivacyPage';
 import { fetchDatasets } from './services/api';
 import { Dataset } from './types';
 import './App.css';
@@ -23,12 +21,14 @@ export function App() {
   const [selectedDatasetId, setSelectedDatasetId] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
 
-  const loadDatasets = () => {
+  const loadDatasets = (newId?: string) => {
     setLoading(true);
     fetchDatasets()
       .then((data) => {
         setDatasets(data);
-        if (data.length > 0 && !selectedDatasetId) {
+        if (newId) {
+          setSelectedDatasetId(newId);
+        } else if (data.length > 0 && !selectedDatasetId) {
           setSelectedDatasetId(data[0].id);
         }
       })
@@ -53,13 +53,24 @@ export function App() {
 
         <main className="content-body">
           <Routes>
-            <Route path="/" element={<OverviewPage datasetId={selectedDatasetId} />} />
+            <Route
+              path="/"
+              element={
+                <OverviewPage
+                  datasetId={selectedDatasetId}
+                  datasets={datasets}
+                  onSelectDataset={(id) => setSelectedDatasetId(id)}
+                />
+              }
+            />
             <Route path="/overview" element={<Navigate to="/" replace />} />
             <Route
               path="/datasets"
               element={
                 <DatasetsPage
                   datasetId={selectedDatasetId}
+                  datasets={datasets}
+                  onSelectDataset={(id) => setSelectedDatasetId(id)}
                   onDatasetUploaded={loadDatasets}
                 />
               }
@@ -72,8 +83,6 @@ export function App() {
             <Route path="/experiments" element={<ExperimentsPage datasetId={selectedDatasetId} />} />
             <Route path="/reports" element={<ReportsPage datasetId={selectedDatasetId} />} />
             <Route path="/provenance" element={<ProvenancePage />} />
-            <Route path="/terms" element={<TermsPage />} />
-            <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

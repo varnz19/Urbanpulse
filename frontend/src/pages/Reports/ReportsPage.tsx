@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { LoadingSkeleton, ErrorAlert } from '../../components/common/Feedback';
-import { fetchReportSummary } from '../../services/api';
+import { fetchReportSummary, API_BASE } from '../../services/api';
 
 interface ReportsPageProps {
   datasetId: string;
@@ -28,7 +28,7 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ datasetId }) => {
   };
 
   const handleDownloadMarkdown = () => {
-    window.open(`/api/reports/${datasetId}/export-markdown`, '_blank');
+    window.open(`${API_BASE}/reports/${datasetId}/export-markdown`, '_blank');
   };
 
   if (loading) return <LoadingSkeleton message="Synthesizing computed findings and generating executive report..." />;

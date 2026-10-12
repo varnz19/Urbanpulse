@@ -65,11 +65,6 @@ export const Sidebar: React.FC = () => {
           <span>Status: Operational</span>
           <span style={{ color: 'var(--accent-teal)' }}>v1.0</span>
         </div>
-        <div className="sidebar-footer-links">
-          <NavLink to="/terms" className="sidebar-footer-link">Terms of Service</NavLink>
-          <span>•</span>
-          <NavLink to="/privacy" className="sidebar-footer-link">Privacy Policy</NavLink>
-        </div>
       </div>
     </aside>
   );

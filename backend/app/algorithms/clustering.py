@@ -13,7 +13,11 @@ def run_kmeans_clustering(df: pd.DataFrame, features: List[str], k: int = 3, sca
     """
     valid_features = [f for f in features if f in df.columns and pd.api.types.is_numeric_dtype(df[f])]
     if len(valid_features) < 1:
-        raise ValueError("At least one numeric feature is required for clustering.")
+        # Automatic fallback: select available numeric columns
+        valid_features = [c for c in df.columns if pd.api.types.is_numeric_dtype(df[c]) and c not in ('Unnamed: 0', 'id', 'ID')]
+        if len(valid_features) < 1:
+            raise ValueError("At least one numeric feature is required for clustering.")
+        valid_features = valid_features[:4]
 
     clean_df = df.dropna(subset=valid_features).copy()
     for f in valid_features:
@@ -34,11 +38,12 @@ def run_kmeans_clustering(df: pd.DataFrame, features: List[str], k: int = 3, sca
     cluster_labels = kmeans.fit_predict(X_scaled)
     clean_df['cluster'] = cluster_labels
 
-    # Calculate Silhouette score (if n_samples > k and k > 1)
+    # Calculate Silhouette score (efficient sampling for datasets > 1500 samples)
     sil_score = 0.0
     if len(clean_df) > k and k > 1:
         try:
-            sil_score = float(round(silhouette_score(X_scaled, cluster_labels), 3))
+            sample_sz = min(1500, len(clean_df))
+            sil_score = float(round(silhouette_score(X_scaled, cluster_labels, sample_size=sample_sz, random_state=42), 3))
         except Exception:
             sil_score = 0.0
 
@@ -89,13 +94,17 @@ def run_kmeans_clustering(df: pd.DataFrame, features: List[str], k: int = 3, sca
         ))
 
     # 2D PCA Projections
-    pca = PCA(n_components=2)
-    pca_coords = pca.fit_transform(X_scaled)
-    var_ratio = pca.explained_variance_ratio_
-    pca_importance = {
-        "PC1_variance_ratio": float(round(var_ratio[0], 3)),
-        "PC2_variance_ratio": float(round(var_ratio[1], 3)) if len(var_ratio) > 1 else 0.0
-    }
+    if X_scaled.shape[1] >= 2:
+        pca = PCA(n_components=2)
+        pca_coords = pca.fit_transform(X_scaled)
+        var_ratio = pca.explained_variance_ratio_
+        pca_importance = {
+            "PC1_variance_ratio": float(round(var_ratio[0], 3)),
+            "PC2_variance_ratio": float(round(var_ratio[1], 3)) if len(var_ratio) > 1 else 0.0
+        }
+    else:
+        pca_coords = np.column_stack([X_scaled[:, 0], np.zeros(len(X_scaled))])
+        pca_importance = {"PC1_variance_ratio": 1.0, "PC2_variance_ratio": 0.0}
 
     # Sample up to 250 points for responsive frontend charting
     sample_size = min(len(clean_df), 250)
@@ -105,8 +114,8 @@ def run_kmeans_clustering(df: pd.DataFrame, features: List[str], k: int = 3, sca
     for idx in sample_indices:
         row = clean_df.iloc[idx]
         seg_name = str(row.get("segment_name", row.get("segment_id", f"Record {idx}")))
-        spd = float(row.get("avg_speed_kmh", 0.0))
-        vol = float(row.get("vehicle_count", 0.0))
+        spd = float(row.get("avg_speed_kmh", row.get("speed", 0.0)))
+        vol = float(row.get("vehicle_count", row.get("traffic_volume", row.get("value", 0.0))))
 
         pca_points.append(ClusterPcaPoint(
             id=int(idx),

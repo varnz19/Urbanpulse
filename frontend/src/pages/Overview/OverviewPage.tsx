@@ -3,8 +3,9 @@ import { PageHeader } from '../../components/layout/PageHeader';
 import { MetricCard } from '../../components/common/MetricCard';
 import { LoadingSkeleton, ErrorAlert } from '../../components/common/Feedback';
 import { TrafficMap } from '../../components/maps/TrafficMap';
+import { NavLink } from 'react-router-dom';
 import { fetchOverview, fetchCorridorsGeo } from '../../services/api';
-import { OverviewMetrics, CorridorGeoItem } from '../../types';
+import { OverviewMetrics, CorridorGeoItem, Dataset } from '../../types';
 import {
   ResponsiveContainer, ComposedChart, Line, Bar, XAxis, YAxis,
   Tooltip, Legend, CartesianGrid, PieChart, Pie, Cell
@@ -12,9 +13,16 @@ import {
 
 interface OverviewPageProps {
   datasetId: string;
+  datasets?: Dataset[];
+  onSelectDataset?: (id: string) => void;
 }
 
-export const OverviewPage: React.FC<OverviewPageProps> = ({ datasetId }) => {
+export const OverviewPage: React.FC<OverviewPageProps> = ({ datasetId, datasets = [], onSelectDataset }) => {
+  const currentDataset = datasets.find(d => d.id === datasetId);
+  const demoDatasets = datasets.filter(d => d.is_demo);
+  const customDatasets = datasets.filter(d => !d.is_demo);
+  const isCustom = currentDataset ? !currentDataset.is_demo : false;
+
   const [metrics, setMetrics] = useState<OverviewMetrics | null>(null);
   const [corridors, setCorridors] = useState<CorridorGeoItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -71,6 +79,74 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ datasetId }) => {
         title="Mobility Command Center"
         description="Spatial and temporal traffic performance metrics computed across monitored urban corridors."
       />
+
+      {/* Active Data Scope Banner */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '12px',
+        padding: '12px 18px',
+        marginBottom: '20px',
+        borderRadius: 'var(--radius-sm)',
+        backgroundColor: isCustom ? 'rgba(2, 132, 199, 0.08)' : 'rgba(13, 148, 136, 0.08)',
+        border: `1px solid ${isCustom ? 'rgba(2, 132, 199, 0.35)' : 'rgba(13, 148, 136, 0.35)'}`
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <span style={{
+            fontSize: '0.72rem',
+            fontWeight: 700,
+            padding: '3px 8px',
+            borderRadius: 'var(--radius-sm)',
+            textTransform: 'uppercase',
+            backgroundColor: isCustom ? 'var(--accent-cyan)' : 'var(--accent-teal)',
+            color: '#FFFFFF'
+          }}>
+            {isCustom ? '📁 Custom Uploaded Dataset' : '🏢 Sample Benchmark Dataset'}
+          </span>
+          <span style={{ fontSize: '0.88rem', color: 'var(--text-main)', fontWeight: 700 }}>
+            {currentDataset?.name || datasetId}
+          </span>
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>
+            ({metrics.total_observations.toLocaleString()} records loaded • {currentDataset?.column_count || ''} columns)
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {!isCustom ? (
+            customDatasets.length > 0 ? (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ fontSize: '0.76rem', padding: '5px 12px' }}
+                onClick={() => onSelectDataset?.(customDatasets[0].id)}
+              >
+                Switch to Uploaded Data ({customDatasets[0].name})
+              </button>
+            ) : (
+              <NavLink to="/datasets" className="btn btn-secondary" style={{ fontSize: '0.76rem', padding: '5px 12px', textDecoration: 'none' }}>
+                + Upload Your Own Dataset
+              </NavLink>
+            )
+          ) : (
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ fontSize: '0.76rem', padding: '5px 12px' }}
+              onClick={() => {
+                const demo = demoDatasets[0];
+                if (demo) onSelectDataset?.(demo.id);
+              }}
+            >
+              Switch to Sample Benchmark (Hyderabad)
+            </button>
+          )}
+          <NavLink to="/datasets" className="btn btn-primary" style={{ fontSize: '0.76rem', padding: '5px 12px', textDecoration: 'none' }}>
+            Manage Datasets
+          </NavLink>
+        </div>
+      </div>
 
       {/* KPI Metrics: 5-column functional telemetry strip */}
       <div className="metrics-grid">

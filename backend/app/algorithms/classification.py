@@ -12,16 +12,34 @@ def run_classification(df: pd.DataFrame, req: ClassifyRequest) -> ClassifyRespon
     """
     Run machine learning classification with stratified evaluation, confusion matrix, and explainable rules.
     """
-    if req.target_column not in df.columns:
-        raise ValueError(f"Target column '{req.target_column}' does not exist in dataset.")
+    target_col = req.target_column
+    work_df = df.copy()
+
+    if target_col not in work_df.columns:
+        # Auto-detect target column: look for categorical column with 2-20 unique classes
+        candidates = [c for c in work_df.columns if 2 <= work_df[c].nunique() <= 20 and c not in ('Unnamed: 0', 'id', 'ID', 'date_time', 'timestamp')]
+        if candidates:
+            target_col = candidates[0]
+        else:
+            # Fallback: bin the primary numeric column into 3 tiers
+            num_cols = [c for c in work_df.columns if pd.api.types.is_numeric_dtype(work_df[c]) and c != 'Unnamed: 0']
+            if num_cols:
+                target_col = "_congestion_tier_"
+                work_df[target_col] = pd.qcut(work_df[num_cols[0]], q=3, labels=["Low", "Moderate", "High"], duplicates="drop").astype(str)
+            else:
+                raise ValueError(f"Target column '{req.target_column}' does not exist in dataset.")
 
     # Drop rows where target is missing
-    clean_df = df.dropna(subset=[req.target_column]).copy()
+    clean_df = work_df.dropna(subset=[target_col]).copy()
     if len(clean_df) < 20:
         raise ValueError("Insufficient data rows for reliable classification.")
 
+    # Sample large datasets for responsive execution
+    if len(clean_df) > 8000:
+        clean_df = clean_df.sample(n=8000, random_state=req.random_state or 42)
+
     # Target encoding
-    y_raw = clean_df[req.target_column].astype(str)
+    y_raw = clean_df[target_col].astype(str)
     le_target = LabelEncoder()
     y = le_target.fit_transform(y_raw)
     class_names = [str(c) for c in le_target.classes_]
@@ -31,9 +49,12 @@ def run_classification(df: pd.DataFrame, req: ClassifyRequest) -> ClassifyRespon
         raise ValueError("Target column must contain at least 2 unique classes.")
 
     # Feature selection & preparation
-    feature_candidates = [c for c in req.feature_columns if c in clean_df.columns and c != req.target_column]
+    feature_candidates = [c for c in req.feature_columns if c in clean_df.columns and c != target_col]
     if not feature_candidates:
-        raise ValueError("No valid feature columns provided.")
+        # Auto-select remaining available columns
+        feature_candidates = [c for c in clean_df.columns if c != target_col and c not in ('Unnamed: 0', 'id', 'ID', 'date_time', 'timestamp')][:6]
+        if not feature_candidates:
+            raise ValueError("No valid feature columns provided.")
 
     X_df = clean_df[feature_candidates].copy()
 
@@ -64,7 +85,7 @@ def run_classification(df: pd.DataFrame, req: ClassifyRequest) -> ClassifyRespon
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=req.test_size, random_state=req.random_state, stratify=y
         )
-    except ValueError:
+    except Exception:
         # Fallback if classes are too small for stratified split
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=req.test_size, random_state=req.random_state
@@ -133,10 +154,14 @@ def run_classification(df: pd.DataFrame, req: ClassifyRequest) -> ClassifyRespon
     cv_mean = None
     cv_std = None
     try:
-        cv = StratifiedKFold(n_splits=min(5, len(np.unique(y_train))), shuffle=True, random_state=req.random_state)
-        scores = cross_val_score(clf, X_train, y_train, cv=cv, scoring="accuracy")
-        cv_mean = float(round(np.mean(scores), 3))
-        cv_std = float(round(np.std(scores), 3))
+        y_series = pd.Series(y_train)
+        min_class_count = int(y_series.value_counts().min())
+        if min_class_count >= 2:
+            n_splits = min(5, min_class_count)
+            cv = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=req.random_state)
+            scores = cross_val_score(clf, X_train, y_train, cv=cv, scoring="accuracy")
+            cv_mean = float(round(np.mean(scores), 3))
+            cv_std = float(round(np.std(scores), 3))
     except Exception:
         pass
 
