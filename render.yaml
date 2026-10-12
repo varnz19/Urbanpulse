@@ -2,7 +2,7 @@ services:
   # Backend API & ML Engine
   - type: web
     name: urbanpulse-backend
-    env: python
+    runtime: python
     plan: free
     rootDir: backend
     buildCommand: pip install -r requirements.txt
@@ -15,15 +15,17 @@ services:
       - key: SAMPLE_DATA_DIR
         value: ./app/sample_data
 
-  # Frontend Vite Single Page App
+  # Frontend Vite Single Page App (Static Sites do not specify a plan)
   - type: web
     name: urbanpulse-frontend
-    env: static
-    plan: free
+    runtime: static
     rootDir: frontend
     buildCommand: npm install && npm run build
-    staticPublishPath: dist
+    staticPublishPath: ./dist
     routes:
       - type: rewrite
         source: /*
         destination: /index.html
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false
